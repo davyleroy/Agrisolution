@@ -11,19 +11,34 @@ import {
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
 import { LinearGradient } from 'expo-linear-gradient';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { Camera, Image as ImageIcon, FlipHorizontal, Zap, X, CircleCheck as CheckCircle } from 'lucide-react-native';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { SUPPORTED_CROPS } from '@/services/mlService';
 
 const { width, height } = Dimensions.get('window');
 
 export default function ScanScreen() {
   const { t } = useLanguage();
+  const params = useLocalSearchParams();
+  const cropType = params.cropType as string;
+  const imageSource = params.imageSource as string;
+  
   const [facing, setFacing] = useState<CameraType>('back');
   const [permission, requestPermission] = useCameraPermissions();
   const [isCapturing, setIsCapturing] = useState(false);
   const [showCamera, setShowCamera] = useState(false);
   const scaleAnim = useRef(new Animated.Value(1)).current;
+
+  const selectedCrop = SUPPORTED_CROPS.find(crop => crop.id === cropType);
+
+  React.useEffect(() => {
+    if (imageSource === 'camera') {
+      setShowCamera(true);
+    } else if (imageSource === 'gallery') {
+      pickImage();
+    }
+  }, [imageSource]);
 
   if (!permission) {
     return <View style={styles.container} />;
@@ -79,32 +94,38 @@ export default function ScanScreen() {
     
     // Simulate capture and processing
     setTimeout(() => {
-      simulateAnalysis();
+      navigateToResults('mock_image_uri');
       setIsCapturing(false);
     }, 1000);
   };
 
   const pickImage = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.8,
-    });
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+      });
 
-    if (!result.canceled) {
-      simulateAnalysis();
+      if (!result.canceled && result.assets[0]) {
+        navigateToResults(result.assets[0].uri);
+      } else {
+        router.back();
+      }
+    } catch (error) {
+      console.error('Error picking image:', error);
+      Alert.alert(t('error'), t('errorPickingImage'));
+      router.back();
     }
   };
 
-  const simulateAnalysis = () => {
-    // Simulate navigation to results with mock data
+  const navigateToResults = (imageUri: string) => {
     router.push({
       pathname: '/results',
       params: {
-        disease: t('healthyPlant'),
-        confidence: '94',
-        recommendation: t('healthyPlantDesc'),
+        imageUri,
+        cropType: selectedCrop?.id || 'unknown',
       },
     });
   };
@@ -159,6 +180,19 @@ export default function ScanScreen() {
             </TouchableOpacity>
           </View>
 
+          {selectedCrop && (
+            <View style={styles.cropInfoContainer}>
+              <Text style={styles.cropInfoTitle}>{t('selectedCrop')}</Text>
+              <View style={styles.cropInfoCard}>
+                <Text style={styles.cropInfoEmoji}>{selectedCrop.icon}</Text>
+                <View style={styles.cropInfoText}>
+                  <Text style={styles.cropInfoName}>{t(selectedCrop.id)}</Text>
+                  <Text style={styles.cropInfoScientific}>{selectedCrop.scientificName}</Text>
+                </View>
+              </View>
+            </View>
+          )}
+
           <View style={styles.tipsContainer}>
             <Text style={styles.tipsTitle}>{t('tipsForBetter')}</Text>
             <View style={styles.tip}>
@@ -190,6 +224,14 @@ export default function ScanScreen() {
           >
             <X size={24} color="#ffffff" strokeWidth={2} />
           </TouchableOpacity>
+          
+          {selectedCrop && (
+            <View style={styles.cropIndicator}>
+              <Text style={styles.cropIndicatorEmoji}>{selectedCrop.icon}</Text>
+              <Text style={styles.cropIndicatorText}>{t(selectedCrop.id)}</Text>
+            </View>
+          )}
+          
           <TouchableOpacity
             style={styles.flipButton}
             onPress={toggleCameraFacing}
@@ -291,7 +333,7 @@ const styles = StyleSheet.create({
   },
   header: {
     alignItems: 'center',
-    marginBottom: 40,
+    marginBottom: 30,
   },
   title: {
     fontSize: 28,
@@ -307,7 +349,7 @@ const styles = StyleSheet.create({
   },
   optionsContainer: {
     gap: 16,
-    marginBottom: 40,
+    marginBottom: 30,
   },
   optionCard: {
     borderRadius: 20,
@@ -334,6 +376,45 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     opacity: 0.9,
     textAlign: 'center',
+  },
+  cropInfoContainer: {
+    marginBottom: 30,
+  },
+  cropInfoTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#1f2937',
+    marginBottom: 12,
+  },
+  cropInfoCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    padding: 16,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+  },
+  cropInfoEmoji: {
+    fontSize: 32,
+    marginRight: 16,
+  },
+  cropInfoText: {
+    flex: 1,
+  },
+  cropInfoName: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#1f2937',
+    marginBottom: 2,
+  },
+  cropInfoScientific: {
+    fontSize: 14,
+    color: '#6b7280',
+    fontStyle: 'italic',
   },
   tipsContainer: {
     backgroundColor: '#ffffff',
@@ -367,6 +448,7 @@ const styles = StyleSheet.create({
   cameraHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
     paddingTop: 60,
     paddingHorizontal: 20,
   },
@@ -374,6 +456,23 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     borderRadius: 20,
     padding: 8,
+  },
+  cropIndicator: {
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  cropIndicatorEmoji: {
+    fontSize: 20,
+    marginRight: 8,
+  },
+  cropIndicatorText: {
+    fontSize: 14,
+    color: '#ffffff',
+    fontWeight: '600',
   },
   flipButton: {
     backgroundColor: 'rgba(0, 0, 0, 0.5)',

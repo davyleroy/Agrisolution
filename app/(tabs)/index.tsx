@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   View,
   Text,
@@ -10,13 +10,26 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import { Camera, Image as ImageIcon, Leaf, TrendingUp, Shield, Award, ArrowRight, Sun, Droplets } from 'lucide-react-native';
+import { Camera, Image as ImageIcon, Leaf, TrendingUp, Shield, Award, ArrowRight, Sun, Droplets, LogOut } from 'lucide-react-native';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 const { width } = Dimensions.get('window');
 
 export default function HomeScreen() {
   const { t } = useLanguage();
+  const { user, signOut } = useAuth();
+
+  useEffect(() => {
+    // Redirect to sign-in if not authenticated
+    if (!user) {
+      router.replace('/(auth)/sign-in');
+    }
+  }, [user]);
+
+  if (!user) {
+    return null; // Show nothing while redirecting
+  }
 
   const quickActions = [
     {
@@ -26,7 +39,7 @@ export default function HomeScreen() {
       icon: Camera,
       color: '#059669',
       gradient: ['#059669', '#10b981'],
-      onPress: () => router.push('/scan'),
+      onPress: () => router.push('/crop-selection?imageSource=camera'),
     },
     {
       id: 'gallery',
@@ -35,7 +48,7 @@ export default function HomeScreen() {
       icon: ImageIcon,
       color: '#2563eb',
       gradient: ['#2563eb', '#3b82f6'],
-      onPress: () => router.push('/scan'),
+      onPress: () => router.push('/crop-selection?imageSource=gallery'),
     },
   ];
 
@@ -63,6 +76,11 @@ export default function HomeScreen() {
     { label: t('waterLevel'), value: t('good'), icon: Droplets },
   ];
 
+  const handleSignOut = async () => {
+    await signOut();
+    router.replace('/(auth)/sign-in');
+  };
+
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       {/* Header with Gradient */}
@@ -75,9 +93,19 @@ export default function HomeScreen() {
             <Text style={styles.welcomeText}>{t('welcomeToAgrisol')}</Text>
             <Text style={styles.appTitle}>{t('appTitle')}</Text>
             <Text style={styles.subtitle}>{t('appSubtitle')}</Text>
+            {user && (
+              <Text style={styles.userGreeting}>
+                {t('hello')}, {user.user_metadata?.full_name || user.email}!
+              </Text>
+            )}
           </View>
-          <View style={styles.logoContainer}>
-            <Leaf size={40} color="#ffffff" strokeWidth={2} />
+          <View style={styles.headerActions}>
+            <View style={styles.logoContainer}>
+              <Leaf size={40} color="#ffffff" strokeWidth={2} />
+            </View>
+            <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
+              <LogOut size={20} color="#ffffff" strokeWidth={2} />
+            </TouchableOpacity>
           </View>
         </View>
       </LinearGradient>
@@ -183,7 +211,7 @@ const styles = StyleSheet.create({
   headerContent: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
   },
   welcomeText: {
     fontSize: 16,
@@ -203,10 +231,26 @@ const styles = StyleSheet.create({
     opacity: 0.8,
     marginTop: 4,
   },
+  userGreeting: {
+    fontSize: 14,
+    color: '#ffffff',
+    opacity: 0.9,
+    marginTop: 8,
+    fontWeight: '500',
+  },
+  headerActions: {
+    alignItems: 'center',
+    gap: 12,
+  },
   logoContainer: {
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
     borderRadius: 20,
     padding: 12,
+  },
+  signOutButton: {
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 16,
+    padding: 8,
   },
   section: {
     paddingHorizontal: 20,

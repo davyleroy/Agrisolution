@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   Image,
   Share,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -21,72 +22,167 @@ import {
   Save,
   Leaf,
   TrendingUp,
+  Clock,
+  Target,
 } from 'lucide-react-native';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth, supabase } from '@/contexts/AuthContext';
+import { mlService, SUPPORTED_CROPS, MLAnalysisResult } from '@/services/mlService';
 
 export default function ResultsScreen() {
+  const { t } = useLanguage();
+  const { user } = useAuth();
   const params = useLocalSearchParams();
-  const { disease, confidence, recommendation } = params;
+  const imageUri = params.imageUri as string;
+  const cropType = params.cropType as string;
+  
+  const [analysisResult, setAnalysisResult] = useState<MLAnalysisResult | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
-  // Mock additional data
-  const additionalInfo = {
-    severity: disease === 'Healthy Plant' ? 'None' : 'Medium',
-    affectedArea: disease === 'Healthy Plant' ? '0%' : '15%',
-    treatmentUrgency: disease === 'Healthy Plant' ? 'None' : 'Moderate',
-    estimatedRecovery: disease === 'Healthy Plant' ? 'N/A' : '2-3 weeks',
+  const selectedCrop = SUPPORTED_CROPS.find(crop => crop.id === cropType);
+
+  useEffect(() => {
+    analyzeImage();
+  }, []);
+
+  const analyzeImage = async () => {
+    if (!selectedCrop) {
+      setLoading(false);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const result = await mlService.analyzeImage(imageUri, selectedCrop);
+      setAnalysisResult(result);
+    } catch (error) {
+      console.error('Analysis error:', error);
+      Alert.alert(t('error'), t('analysisError'));
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const recommendations = [
-    {
-      title: 'Immediate Action',
-      action: disease === 'Healthy Plant' 
-        ? 'Continue regular maintenance routine'
-        : 'Remove affected leaves and apply appropriate treatment',
-      icon: AlertTriangle,
-      color: disease === 'Healthy Plant' ? '#059669' : '#f59e0b',
-    },
-    {
-      title: 'Prevention',
-      action: 'Ensure proper spacing and air circulation around plants',
-      icon: Leaf,
-      color: '#059669',
-    },
-    {
-      title: 'Monitoring',
-      action: 'Check plants weekly for signs of disease progression',
-      icon: TrendingUp,
-      color: '#2563eb',
-    },
-  ];
-
-  const isHealthy = disease === 'Healthy Plant';
-  const confidenceNum = parseInt(confidence as string);
-
   const handleShare = async () => {
+    if (!analysisResult?.prediction) return;
+
     try {
+      const { prediction } = analysisResult;
+      const textToShare = `${t('agrisolAnalysis')}:
+
+${t('crop')}: ${selectedCrop ? t(selectedCrop.id) : t('unknown')}
+${t('detected')}: ${prediction.disease}
+${t('confidence')}: ${prediction.confidence}%
+${t('severity')}: ${t(prediction.severity.toLowerCase())}
+
+${t('recommendations')}:
+${prediction.recommendations.slice(0, 3).map(rec => `• ${rec}`).join('\n')}
+
+${t('analyzedWithAgrisol')}`;
+
       await Share.share({
-        message: `Agrisol Analysis Results:\n\nDetected: ${disease}\nConfidence: ${confidence}%\nRecommendation: ${recommendation}\n\nAnalyzed with Agrisol - AI-Powered Crop Health Monitor`,
+        message: textToShare,
+        title: t('agrisolAnalysisResults'),
       });
     } catch (error) {
       console.error('Error sharing:', error);
     }
   };
 
-  const handleSave = () => {
-    Alert.alert(
-      'Analysis Saved',
-      'Your scan results have been saved to your history.',
-      [{ text: 'OK' }]
+  const handleSave = async () => {
+    if (!analysisResult?.prediction || !user) {
+      Alert.alert(t('error'), t('mustBeSignedIn'));
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const { prediction } = analysisResult;
+      
+      const { error } = await supabase
+        .from('scan_history')
+        .insert([
+          {
+            user_id: user.id,
+            crop_type: cropType,
+            image_uri: imageUri,
+            detected_disease: prediction.disease,
+            confidence: prediction.confidence,
+            severity: prediction.severity,
+            treatment_urgency: prediction.treatmentUrgency,
+            estimated_recovery: prediction.estimatedRecovery,
+            recommendations: prediction.recommendations,
+            created_at: new Date().toISOString(),
+          },
+        ]);
+
+      if (error) {
+        throw error;
+      }
+
+      Alert.alert(t('success'), t('analysisSaved'));
+    } catch (error) {
+      console.error('Error saving analysis:', error);
+      Alert.alert(t('error'), t('errorSavingAnalysis'));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <LinearGradient
+          colors={['#059669', '#10b981']}
+          style={styles.loadingGradient}
+        >
+          <ActivityIndicator size="large" color="#ffffff" />
+          <Text style={styles.loadingText}>{t('analyzingImage')}</Text>
+          <Text style={styles.loadingSubtext}>{t('pleaseWait')}</Text>
+        </LinearGradient>
+      </View>
     );
-  };
+  }
 
-  const getStatusColor = () => {
-    if (isHealthy) return '#059669';
-    return '#dc2626';
-  };
+  if (!analysisResult || !analysisResult.success || !analysisResult.prediction) {
+    return (
+      <View style={styles.errorContainer}>
+        <AlertTriangle size={64} color="#dc2626" strokeWidth={1.5} />
+        <Text style={styles.errorTitle}>{t('analysisError')}</Text>
+        <Text style={styles.errorText}>{analysisResult?.error || t('unknownError')}</Text>
+        <TouchableOpacity style={styles.retryButton} onPress={() => router.back()}>
+          <Text style={styles.retryButtonText}>{t('tryAgain')}</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
 
-  const getStatusIcon = () => {
-    return isHealthy ? CheckCircle : AlertTriangle;
-  };
+  const { prediction } = analysisResult;
+  const isHealthy = prediction.disease.toLowerCase().includes('healthy');
+  const statusColor = isHealthy ? '#059669' : '#dc2626';
+  const StatusIcon = isHealthy ? CheckCircle : AlertTriangle;
+
+  const recommendations = [
+    {
+      title: t('immediateAction'),
+      action: prediction.recommendations[0] || t('noActionNeeded'),
+      icon: AlertTriangle,
+      color: prediction.treatmentUrgency === 'High' ? '#dc2626' : '#f59e0b',
+    },
+    {
+      title: t('prevention'),
+      action: prediction.recommendations[1] || t('continueRegularCare'),
+      icon: Leaf,
+      color: '#059669',
+    },
+    {
+      title: t('monitoring'),
+      action: prediction.recommendations[2] || t('regularMonitoring'),
+      icon: TrendingUp,
+      color: '#2563eb',
+    },
+  ];
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
@@ -109,73 +205,70 @@ export default function ResultsScreen() {
         
         <View style={styles.headerContent}>
           <View style={styles.statusIcon}>
-            {React.createElement(getStatusIcon(), {
-              size: 48,
-              color: '#ffffff',
-              strokeWidth: 2,
-            })}
+            <StatusIcon size={48} color="#ffffff" strokeWidth={2} />
           </View>
-          <Text style={styles.resultTitle}>Analysis Complete</Text>
+          <Text style={styles.resultTitle}>{t('analysisComplete')}</Text>
           <Text style={styles.resultSubtitle}>
-            {isHealthy ? 'Great news!' : 'Issue detected'}
+            {isHealthy ? t('greatNews') : t('issueDetected')}
           </Text>
         </View>
       </LinearGradient>
 
-      {/* Sample Image */}
+      {/* Image and Crop Info */}
       <View style={styles.imageContainer}>
-        <Image
-          source={{
-            uri: isHealthy
-              ? 'https://images.pexels.com/photos/1459534/pexels-photo-1459534.jpeg?auto=compress&cs=tinysrgb&w=400'
-              : 'https://images.pexels.com/photos/1153655/pexels-photo-1153655.jpeg?auto=compress&cs=tinysrgb&w=400',
-          }}
-          style={styles.cropImage}
-        />
+        <Image source={{ uri: imageUri }} style={styles.cropImage} />
+        {selectedCrop && (
+          <View style={styles.cropBadge}>
+            <Text style={styles.cropBadgeEmoji}>{selectedCrop.icon}</Text>
+            <Text style={styles.cropBadgeText}>{t(selectedCrop.id)}</Text>
+          </View>
+        )}
       </View>
 
       {/* Main Results Card */}
       <View style={styles.resultsCard}>
         <View style={styles.mainResult}>
-          <Text style={styles.diseaseTitle}>{disease}</Text>
+          <Text style={styles.diseaseTitle}>{prediction.disease}</Text>
           <View style={styles.confidenceContainer}>
-            <View style={[styles.confidenceBar, { backgroundColor: getStatusColor() }]}>
+            <View style={[styles.confidenceBar, { backgroundColor: statusColor }]}>
               <View
                 style={[
                   styles.confidenceFill,
-                  { width: `${confidenceNum}%`, backgroundColor: '#ffffff' },
+                  { width: `${prediction.confidence}%`, backgroundColor: '#ffffff' },
                 ]}
               />
             </View>
-            <Text style={styles.confidenceText}>{confidence}% Confidence</Text>
+            <Text style={styles.confidenceText}>{prediction.confidence}% {t('confidence')}</Text>
           </View>
         </View>
 
         <View style={styles.detailsGrid}>
           <View style={styles.detailItem}>
-            <Text style={styles.detailLabel}>Severity</Text>
-            <Text style={[styles.detailValue, { color: getStatusColor() }]}>
-              {additionalInfo.severity}
+            <Text style={styles.detailLabel}>{t('severity')}</Text>
+            <Text style={[styles.detailValue, { color: statusColor }]}>
+              {t(prediction.severity.toLowerCase())}
             </Text>
           </View>
           <View style={styles.detailItem}>
-            <Text style={styles.detailLabel}>Affected Area</Text>
-            <Text style={styles.detailValue}>{additionalInfo.affectedArea}</Text>
+            <Text style={styles.detailLabel}>{t('urgency')}</Text>
+            <Text style={styles.detailValue}>{t(prediction.treatmentUrgency.toLowerCase())}</Text>
           </View>
           <View style={styles.detailItem}>
-            <Text style={styles.detailLabel}>Urgency</Text>
-            <Text style={styles.detailValue}>{additionalInfo.treatmentUrgency}</Text>
+            <Text style={styles.detailLabel}>{t('recoveryTime')}</Text>
+            <Text style={styles.detailValue}>{prediction.estimatedRecovery}</Text>
           </View>
           <View style={styles.detailItem}>
-            <Text style={styles.detailLabel}>Recovery Time</Text>
-            <Text style={styles.detailValue}>{additionalInfo.estimatedRecovery}</Text>
+            <Text style={styles.detailLabel}>{t('processingTime')}</Text>
+            <Text style={styles.detailValue}>
+              {analysisResult.processingTime ? `${(analysisResult.processingTime / 1000).toFixed(1)}s` : 'N/A'}
+            </Text>
           </View>
         </View>
       </View>
 
       {/* Recommendations */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Recommendations</Text>
+        <Text style={styles.sectionTitle}>{t('recommendations')}</Text>
         {recommendations.map((rec, index) => (
           <View key={index} style={styles.recommendationCard}>
             <View style={[styles.recIcon, { backgroundColor: `${rec.color}20` }]}>
@@ -189,43 +282,58 @@ export default function ResultsScreen() {
         ))}
       </View>
 
-      {/* Detailed Recommendation */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Detailed Analysis</Text>
-        <View style={styles.detailedCard}>
-          <Text style={styles.detailedText}>{recommendation}</Text>
-          
-          {!isHealthy && (
-            <View style={styles.warningContainer}>
-              <AlertTriangle size={16} color="#f59e0b" strokeWidth={2} />
-              <Text style={styles.warningText}>
-                Monitor your plant closely and consider consulting with a local agricultural expert for severe cases.
+      {/* Additional Recommendations */}
+      {prediction.recommendations.length > 3 && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>{t('additionalRecommendations')}</Text>
+          <View style={styles.detailedCard}>
+            {prediction.recommendations.slice(3).map((rec, index) => (
+              <Text key={index} style={styles.additionalRecText}>
+                • {rec}
               </Text>
-            </View>
-          )}
+            ))}
+          </View>
         </View>
-      </View>
+      )}
+
+      {/* Warning for Non-Healthy Plants */}
+      {!isHealthy && (
+        <View style={styles.section}>
+          <View style={styles.warningCard}>
+            <AlertTriangle size={20} color="#f59e0b" strokeWidth={2} />
+            <Text style={styles.warningText}>
+              {t('consultExpertWarning')}
+            </Text>
+          </View>
+        </View>
+      )}
 
       {/* Action Buttons */}
       <View style={styles.actionsContainer}>
-        <TouchableOpacity style={styles.primaryButton} onPress={() => router.push('/scan')}>
+        <TouchableOpacity style={styles.primaryButton} onPress={() => router.push('/crop-selection?imageSource=camera')}>
           <Camera size={20} color="#ffffff" strokeWidth={2} />
-          <Text style={styles.primaryButtonText}>New Scan</Text>
+          <Text style={styles.primaryButtonText}>{t('newScan')}</Text>
         </TouchableOpacity>
         
-        <TouchableOpacity style={styles.secondaryButton} onPress={handleSave}>
+        <TouchableOpacity 
+          style={[styles.secondaryButton, saving && styles.disabledButton]} 
+          onPress={handleSave}
+          disabled={saving}
+        >
           <Save size={20} color="#059669" strokeWidth={2} />
-          <Text style={styles.secondaryButtonText}>Save Result</Text>
+          <Text style={styles.secondaryButtonText}>
+            {saving ? t('saving') : t('saveResult')}
+          </Text>
         </TouchableOpacity>
       </View>
 
       {/* Guide Link */}
       <TouchableOpacity
         style={styles.guideLink}
-        onPress={() => router.push('/guide')}
+        onPress={() => router.push('/(tabs)/guide')}
       >
         <BookOpen size={20} color="#6b7280" strokeWidth={2} />
-        <Text style={styles.guideLinkText}>View Crop Care Guide</Text>
+        <Text style={styles.guideLinkText}>{t('viewCropCareGuide')}</Text>
       </TouchableOpacity>
 
       <View style={styles.bottomSpacing} />
@@ -237,6 +345,62 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f8fafc',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f8fafc',
+  },
+  loadingGradient: {
+    alignItems: 'center',
+    padding: 40,
+    borderRadius: 20,
+    margin: 20,
+  },
+  loadingText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#ffffff',
+    marginTop: 20,
+  },
+  loadingSubtext: {
+    fontSize: 16,
+    color: '#ffffff',
+    opacity: 0.8,
+    marginTop: 8,
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 40,
+    backgroundColor: '#f8fafc',
+  },
+  errorTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#dc2626',
+    marginTop: 20,
+    marginBottom: 12,
+  },
+  errorText: {
+    fontSize: 16,
+    color: '#6b7280',
+    textAlign: 'center',
+    lineHeight: 22,
+    marginBottom: 30,
+  },
+  retryButton: {
+    backgroundColor: '#059669',
+    borderRadius: 12,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+  },
+  retryButtonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#ffffff',
   },
   header: {
     paddingTop: 60,
@@ -281,6 +445,7 @@ const styles = StyleSheet.create({
   imageContainer: {
     paddingHorizontal: 20,
     marginTop: -30,
+    position: 'relative',
   },
   cropImage: {
     width: '100%',
@@ -291,6 +456,26 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 12,
+  },
+  cropBadge: {
+    position: 'absolute',
+    top: 16,
+    right: 36,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  cropBadgeEmoji: {
+    fontSize: 16,
+    marginRight: 6,
+  },
+  cropBadgeText: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#1f2937',
   },
   resultsCard: {
     backgroundColor: '#ffffff',
@@ -313,6 +498,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#1f2937',
     marginBottom: 12,
+    textAlign: 'center',
   },
   confidenceContainer: {
     alignItems: 'center',
@@ -405,25 +591,25 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 4,
   },
-  detailedText: {
+  additionalRecText: {
     fontSize: 14,
     color: '#374151',
     lineHeight: 22,
-    marginBottom: 12,
+    marginBottom: 8,
   },
-  warningContainer: {
+  warningCard: {
     flexDirection: 'row',
     backgroundColor: '#fef3c7',
-    borderRadius: 8,
-    padding: 12,
+    borderRadius: 12,
+    padding: 16,
     alignItems: 'flex-start',
   },
   warningText: {
-    fontSize: 12,
+    fontSize: 14,
     color: '#92400e',
-    marginLeft: 8,
+    marginLeft: 12,
     flex: 1,
-    lineHeight: 18,
+    lineHeight: 20,
   },
   actionsContainer: {
     flexDirection: 'row',
@@ -457,6 +643,9 @@ const styles = StyleSheet.create({
     gap: 8,
     borderWidth: 1,
     borderColor: '#059669',
+  },
+  disabledButton: {
+    opacity: 0.6,
   },
   secondaryButtonText: {
     fontSize: 16,
