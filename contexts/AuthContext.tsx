@@ -2,8 +2,17 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { createClient, SupabaseClient, User, Session } from '@supabase/supabase-js';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY!;
+const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
+const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key';
+
+// Validate environment variables
+if (!process.env.EXPO_PUBLIC_SUPABASE_URL || process.env.EXPO_PUBLIC_SUPABASE_URL === 'your_supabase_url_here') {
+  console.warn('EXPO_PUBLIC_SUPABASE_URL is not properly configured. Please update your .env file.');
+}
+
+if (!process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY === 'your_supabase_anon_key_here') {
+  console.warn('EXPO_PUBLIC_SUPABASE_ANON_KEY is not properly configured. Please update your .env file.');
+}
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {

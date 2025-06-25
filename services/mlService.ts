@@ -59,8 +59,17 @@ class MLService {
   private apiKey: string;
 
   constructor() {
-    this.baseUrl = process.env.EXPO_PUBLIC_ML_API_URL || '';
+    this.baseUrl = process.env.EXPO_PUBLIC_ML_API_URL || 'https://api.example.com';
     this.apiKey = process.env.EXPO_PUBLIC_ML_API_KEY || '';
+
+    // Validate environment variables
+    if (!process.env.EXPO_PUBLIC_ML_API_URL || process.env.EXPO_PUBLIC_ML_API_URL === 'your_ml_api_url_here') {
+      console.warn('EXPO_PUBLIC_ML_API_URL is not properly configured. Using mock predictions.');
+    }
+
+    if (!process.env.EXPO_PUBLIC_ML_API_KEY || process.env.EXPO_PUBLIC_ML_API_KEY === 'your_ml_api_key_here') {
+      console.warn('EXPO_PUBLIC_ML_API_KEY is not properly configured. Using mock predictions.');
+    }
   }
 
   async analyzeImage(
@@ -68,6 +77,14 @@ class MLService {
     cropType: CropType
   ): Promise<MLAnalysisResult> {
     try {
+      // If environment variables are not properly configured, return mock data
+      if (!process.env.EXPO_PUBLIC_ML_API_URL || 
+          process.env.EXPO_PUBLIC_ML_API_URL === 'your_ml_api_url_here' ||
+          !process.env.EXPO_PUBLIC_ML_API_KEY || 
+          process.env.EXPO_PUBLIC_ML_API_KEY === 'your_ml_api_key_here') {
+        return this.getMockPrediction(cropType);
+      }
+
       const startTime = Date.now();
 
       // Create FormData for image upload
