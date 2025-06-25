@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -19,17 +19,6 @@ const { width } = Dimensions.get('window');
 export default function HomeScreen() {
   const { t } = useLanguage();
   const { user, signOut } = useAuth();
-
-  useEffect(() => {
-    // Redirect to sign-in if not authenticated
-    if (!user) {
-      router.replace('/(auth)/sign-in');
-    }
-  }, [user]);
-
-  if (!user) {
-    return null; // Show nothing while redirecting
-  }
 
   const quickActions = [
     {
