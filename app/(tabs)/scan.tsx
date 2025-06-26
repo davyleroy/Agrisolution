@@ -11,14 +11,7 @@ import {
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
 import { LinearGradient } from 'expo-linear-gradient';
-import { 
-  Camera, 
-  Image as ImageIcon, 
-  FlipHorizontal, 
-  X, 
-  CheckCircle,
-  Zap
-} from 'lucide-react-native';
+import { Camera, Image as ImageIcon, FlipHorizontal, X, CircleCheck as CheckCircle, Zap } from 'lucide-react-native';
 
 const { width, height } = Dimensions.get('window');
 

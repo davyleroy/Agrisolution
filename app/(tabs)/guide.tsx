@@ -8,17 +8,7 @@ import {
   Image,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import {
-  BookOpen,
-  Leaf,
-  Droplets,
-  Sun,
-  Bug,
-  Shield,
-  Calendar,
-  AlertCircle,
-  CheckCircle,
-} from 'lucide-react-native';
+import { BookOpen, Leaf, Droplets, Sun, Bug, Shield, Calendar, CircleAlert as AlertCircle, CircleCheck as CheckCircle } from 'lucide-react-native';
 
 export default function GuideScreen() {
   const [selectedCategory, setSelectedCategory] = useState('diseases');

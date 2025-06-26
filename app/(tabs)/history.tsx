@@ -8,15 +8,7 @@ import {
   Image,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import {
-  Calendar,
-  TrendingUp,
-  Leaf,
-  AlertTriangle,
-  Clock,
-  Filter,
-  Search,
-} from 'lucide-react-native';
+import { Calendar, TrendingUp, Leaf, TriangleAlert as AlertTriangle, Clock, Filter, Search } from 'lucide-react-native';
 
 export default function HistoryScreen() {
   const [filter, setFilter] = useState('all');
