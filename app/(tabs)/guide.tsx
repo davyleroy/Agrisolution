@@ -6,7 +6,6 @@ import {
   ScrollView,
   TouchableOpacity,
   Image,
-  Dimensions,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import {
@@ -17,20 +16,16 @@ import {
   Bug,
   Shield,
   Calendar,
-  ChevronRight,
-  Heart,
   AlertCircle,
   CheckCircle,
 } from 'lucide-react-native';
-
-const { width } = Dimensions.get('window');
 
 export default function GuideScreen() {
   const [selectedCategory, setSelectedCategory] = useState('diseases');
 
   const categories = [
     { id: 'diseases', label: 'Diseases', icon: AlertCircle },
-    { id: 'care', label: 'Care Tips', icon: Heart },
+    { id: 'care', label: 'Care Tips', icon: Leaf },
     { id: 'calendar', label: 'Planting', icon: Calendar },
   ];
 
@@ -54,16 +49,6 @@ export default function GuideScreen() {
       symptoms: ['White powdery coating', 'Stunted growth', 'Leaf distortion'],
       treatment: 'Apply sulfur-based fungicide, improve ventilation',
       prevention: 'Plant resistant varieties, maintain proper spacing',
-    },
-    {
-      id: '3',
-      name: 'Bacterial Spot',
-      crop: 'Pepper, Tomato',
-      severity: 'Medium',
-      image: 'https://images.pexels.com/photos/1459534/pexels-photo-1459534.jpeg?auto=compress&cs=tinysrgb&w=300',
-      symptoms: ['Small dark spots', 'Yellow halos', 'Fruit lesions'],
-      treatment: 'Use copper sprays, remove infected plants',
-      prevention: 'Use certified seeds, practice crop rotation',
     },
   ];
 
@@ -92,30 +77,6 @@ export default function GuideScreen() {
         'Some crops tolerate partial shade',
       ],
     },
-    {
-      id: '3',
-      title: 'Pest Prevention',
-      icon: Bug,
-      color: '#dc2626',
-      tips: [
-        'Inspect plants regularly',
-        'Encourage beneficial insects',
-        'Use companion planting',
-        'Remove infected plants promptly',
-      ],
-    },
-    {
-      id: '4',
-      title: 'Soil Health',
-      icon: Leaf,
-      color: '#059669',
-      tips: [
-        'Test soil pH regularly',
-        'Add organic matter to soil',
-        'Practice crop rotation',
-        'Avoid walking on wet soil',
-      ],
-    },
   ];
 
   const plantingCalendar = [
@@ -128,16 +89,6 @@ export default function GuideScreen() {
       month: 'February',
       crops: ['Peas', 'Onions', 'Carrots'],
       activities: ['Start seeds indoors', 'Prune fruit trees'],
-    },
-    {
-      month: 'March',
-      crops: ['Tomatoes', 'Peppers', 'Herbs'],
-      activities: ['Transplant seedlings', 'Apply mulch'],
-    },
-    {
-      month: 'April',
-      crops: ['Beans', 'Squash', 'Corn'],
-      activities: ['Direct sow warm crops', 'Install supports'],
     },
   ];
 
@@ -188,11 +139,6 @@ export default function GuideScreen() {
             <View style={styles.diseaseSection}>
               <Text style={styles.sectionTitle}>Treatment:</Text>
               <Text style={styles.treatmentText}>{disease.treatment}</Text>
-            </View>
-            
-            <View style={styles.diseaseSection}>
-              <Text style={styles.sectionTitle}>Prevention:</Text>
-              <Text style={styles.preventionText}>{disease.prevention}</Text>
             </View>
           </View>
         </View>
@@ -439,11 +385,6 @@ const styles = StyleSheet.create({
     color: '#6b7280',
   },
   treatmentText: {
-    fontSize: 14,
-    color: '#6b7280',
-    lineHeight: 20,
-  },
-  preventionText: {
     fontSize: 14,
     color: '#6b7280',
     lineHeight: 20,

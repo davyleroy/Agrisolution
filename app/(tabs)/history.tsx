@@ -6,7 +6,6 @@ import {
   ScrollView,
   TouchableOpacity,
   Image,
-  Dimensions,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import {
@@ -18,8 +17,6 @@ import {
   Filter,
   Search,
 } from 'lucide-react-native';
-
-const { width } = Dimensions.get('window');
 
 export default function HistoryScreen() {
   const [filter, setFilter] = useState('all');
@@ -54,16 +51,6 @@ export default function HistoryScreen() {
       confidence: 92,
       status: 'healthy',
       crop: 'Bean',
-    },
-    {
-      id: '4',
-      date: '2024-01-12',
-      time: '11:20',
-      image: 'https://images.pexels.com/photos/1153655/pexels-photo-1153655.jpeg?auto=compress&cs=tinysrgb&w=300',
-      disease: 'Leaf Spot',
-      confidence: 79,
-      status: 'disease',
-      crop: 'Tomato',
     },
   ];
 
@@ -208,17 +195,6 @@ export default function HistoryScreen() {
           );
         })}
       </View>
-
-      {/* Empty State */}
-      {filteredData.length === 0 && (
-        <View style={styles.emptyContainer}>
-          <Search size={48} color="#6b7280" strokeWidth={1} />
-          <Text style={styles.emptyTitle}>No scans found</Text>
-          <Text style={styles.emptyText}>
-            No scans match your current filter. Try selecting a different filter.
-          </Text>
-        </View>
-      )}
 
       <View style={styles.bottomSpacing} />
     </ScrollView>
@@ -382,24 +358,6 @@ const styles = StyleSheet.create({
     fontSize: 10,
     color: '#374151',
     fontWeight: '500',
-  },
-  emptyContainer: {
-    alignItems: 'center',
-    paddingVertical: 60,
-    paddingHorizontal: 40,
-  },
-  emptyTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#374151',
-    marginTop: 16,
-    marginBottom: 8,
-  },
-  emptyText: {
-    fontSize: 14,
-    color: '#6b7280',
-    textAlign: 'center',
-    lineHeight: 20,
   },
   bottomSpacing: {
     height: 20,

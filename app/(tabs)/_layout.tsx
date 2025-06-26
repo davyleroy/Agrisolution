@@ -1,11 +1,8 @@
 import { Tabs } from 'expo-router';
-import { View, Platform } from 'react-native';
-import { Camera, History, Chrome as Home, BookOpen, Settings } from 'lucide-react-native';
-import { useLanguage } from '@/contexts/LanguageContext';
+import { Platform } from 'react-native';
+import { Home, Camera, History, BookOpen, Settings } from 'lucide-react-native';
 
 export default function TabLayout() {
-  const { t } = useLanguage();
-
   return (
     <Tabs
       screenOptions={{
@@ -39,7 +36,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: t('home'),
+          title: 'Home',
           tabBarIcon: ({ size, color }) => (
             <Home size={22} color={color} strokeWidth={2} />
           ),
@@ -48,30 +45,25 @@ export default function TabLayout() {
       <Tabs.Screen
         name="scan"
         options={{
-          title: t('scan'),
+          title: 'Scan',
           tabBarIcon: ({ size, color, focused }) => (
-            <View
+            <Camera 
+              size={22} 
+              color={focused ? '#ffffff' : color} 
+              strokeWidth={2} 
               style={{
-                backgroundColor: focused ? '#059669' : '#e5e7eb',
+                backgroundColor: focused ? '#059669' : 'transparent',
                 borderRadius: 16,
                 padding: 6,
-                alignItems: 'center',
-                justifyContent: 'center',
               }}
-            >
-              <Camera 
-                size={22} 
-                color={focused ? '#ffffff' : '#6b7280'} 
-                strokeWidth={2} 
-              />
-            </View>
+            />
           ),
         }}
       />
       <Tabs.Screen
         name="history"
         options={{
-          title: t('history'),
+          title: 'History',
           tabBarIcon: ({ size, color }) => (
             <History size={22} color={color} strokeWidth={2} />
           ),
@@ -80,7 +72,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="guide"
         options={{
-          title: t('guide'),
+          title: 'Guide',
           tabBarIcon: ({ size, color }) => (
             <BookOpen size={22} color={color} strokeWidth={2} />
           ),
@@ -89,7 +81,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="settings"
         options={{
-          title: t('settings'),
+          title: 'Settings',
           tabBarIcon: ({ size, color }) => (
             <Settings size={22} color={color} strokeWidth={2} />
           ),

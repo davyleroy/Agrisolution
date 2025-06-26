@@ -10,65 +10,69 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import { Camera, Image as ImageIcon, Leaf, TrendingUp, Shield, Award, ArrowRight, Sun, Droplets, LogOut } from 'lucide-react-native';
-import { useLanguage } from '@/contexts/LanguageContext';
-import { useAuth } from '@/contexts/AuthContext';
+import { 
+  Camera, 
+  Image as ImageIcon, 
+  Leaf, 
+  TrendingUp, 
+  Shield, 
+  ArrowRight, 
+  Sun, 
+  Droplets,
+  Zap,
+  Award
+} from 'lucide-react-native';
 
 const { width } = Dimensions.get('window');
 
 export default function HomeScreen() {
-  const { t } = useLanguage();
-  const { user, signOut } = useAuth();
-
   const quickActions = [
     {
       id: 'camera',
-      title: t('takePhoto'),
-      subtitle: t('captureImage'),
+      title: 'Take Photo',
+      subtitle: 'Capture crop image',
       icon: Camera,
       color: '#059669',
       gradient: ['#059669', '#10b981'],
-      onPress: () => router.push('/crop-selection?imageSource=camera'),
+      onPress: () => router.push('/scan'),
     },
     {
       id: 'gallery',
-      title: t('fromGallery'),
-      subtitle: t('selectExisting'),
+      title: 'From Gallery',
+      subtitle: 'Select existing photo',
       icon: ImageIcon,
       color: '#2563eb',
       gradient: ['#2563eb', '#3b82f6'],
-      onPress: () => router.push('/crop-selection?imageSource=gallery'),
+      onPress: () => router.push('/scan'),
     },
   ];
 
   const features = [
     {
       icon: Leaf,
-      title: t('diseaseDetection'),
-      description: t('diseaseDetectionDesc'),
+      title: 'Disease Detection',
+      description: 'AI-powered identification of crop diseases and pests with 95% accuracy',
+      color: '#059669',
     },
     {
       icon: Shield,
-      title: t('instantAnalysis'),
-      description: t('instantAnalysisDesc'),
+      title: 'Instant Analysis',
+      description: 'Get results in seconds with detailed treatment recommendations',
+      color: '#2563eb',
     },
     {
       icon: TrendingUp,
-      title: t('treatmentRecommendations'),
-      description: t('treatmentRecommendationsDesc'),
+      title: 'Smart Insights',
+      description: 'Track crop health trends and receive personalized care tips',
+      color: '#7c3aed',
     },
   ];
 
   const stats = [
-    { label: t('scansToday'), value: '12', icon: Sun },
-    { label: t('healthyPlants'), value: '89%', icon: Leaf },
-    { label: t('waterLevel'), value: t('good'), icon: Droplets },
+    { label: 'Scans Today', value: '12', icon: Sun, color: '#f59e0b' },
+    { label: 'Healthy Plants', value: '89%', icon: Leaf, color: '#059669' },
+    { label: 'Success Rate', value: '95%', icon: Award, color: '#dc2626' },
   ];
-
-  const handleSignOut = async () => {
-    await signOut();
-    router.replace('/(auth)/sign-in');
-  };
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
@@ -79,29 +83,19 @@ export default function HomeScreen() {
       >
         <View style={styles.headerContent}>
           <View>
-            <Text style={styles.welcomeText}>{t('welcomeToAgrisol')}</Text>
-            <Text style={styles.appTitle}>{t('appTitle')}</Text>
-            <Text style={styles.subtitle}>{t('appSubtitle')}</Text>
-            {user && (
-              <Text style={styles.userGreeting}>
-                {t('hello')}, {user.user_metadata?.full_name || user.email}!
-              </Text>
-            )}
+            <Text style={styles.welcomeText}>Welcome to</Text>
+            <Text style={styles.appTitle}>Agrisol</Text>
+            <Text style={styles.subtitle}>AI-Powered Crop Health Monitor</Text>
           </View>
-          <View style={styles.headerActions}>
-            <View style={styles.logoContainer}>
-              <Leaf size={40} color="#ffffff" strokeWidth={2} />
-            </View>
-            <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
-              <LogOut size={20} color="#ffffff" strokeWidth={2} />
-            </TouchableOpacity>
+          <View style={styles.logoContainer}>
+            <Leaf size={40} color="#ffffff" strokeWidth={2} />
           </View>
         </View>
       </LinearGradient>
 
       {/* Quick Actions */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>{t('quickScan')}</Text>
+        <Text style={styles.sectionTitle}>Quick Scan</Text>
         <View style={styles.actionsContainer}>
           {quickActions.map((action) => (
             <TouchableOpacity
@@ -128,11 +122,13 @@ export default function HomeScreen() {
 
       {/* Stats Cards */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>{t('todaysOverview')}</Text>
+        <Text style={styles.sectionTitle}>Today's Overview</Text>
         <View style={styles.statsContainer}>
           {stats.map((stat, index) => (
             <View key={index} style={styles.statCard}>
-              <stat.icon size={24} color="#059669" strokeWidth={2} />
+              <View style={[styles.statIconContainer, { backgroundColor: `${stat.color}20` }]}>
+                <stat.icon size={24} color={stat.color} strokeWidth={2} />
+              </View>
               <Text style={styles.statValue}>{stat.value}</Text>
               <Text style={styles.statLabel}>{stat.label}</Text>
             </View>
@@ -142,11 +138,11 @@ export default function HomeScreen() {
 
       {/* Features */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>{t('howItWorks')}</Text>
+        <Text style={styles.sectionTitle}>How It Works</Text>
         {features.map((feature, index) => (
           <View key={index} style={styles.featureCard}>
-            <View style={styles.featureIconContainer}>
-              <feature.icon size={24} color="#059669" strokeWidth={2} />
+            <View style={[styles.featureIconContainer, { backgroundColor: `${feature.color}20` }]}>
+              <feature.icon size={24} color={feature.color} strokeWidth={2} />
             </View>
             <View style={styles.featureContent}>
               <Text style={styles.featureTitle}>{feature.title}</Text>
@@ -156,9 +152,9 @@ export default function HomeScreen() {
         ))}
       </View>
 
-      {/* Sample Image */}
+      {/* Sample Detection */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>{t('sampleDetection')}</Text>
+        <Text style={styles.sectionTitle}>Sample Detection</Text>
         <View style={styles.sampleCard}>
           <Image
             source={{
@@ -168,13 +164,14 @@ export default function HomeScreen() {
           />
           <View style={styles.sampleContent}>
             <View style={styles.sampleHeader}>
-              <Text style={styles.sampleTitle}>{t('healthyTomatoPlant')}</Text>
+              <Text style={styles.sampleTitle}>Healthy Tomato Plant</Text>
               <View style={styles.confidenceBadge}>
+                <Zap size={12} color="#ffffff" strokeWidth={2} />
                 <Text style={styles.confidenceText}>94%</Text>
               </View>
             </View>
             <Text style={styles.sampleDescription}>
-              {t('healthyPlantDesc')}
+              Your plant appears healthy. Continue with regular maintenance and monitoring for optimal growth.
             </Text>
           </View>
         </View>
@@ -220,26 +217,10 @@ const styles = StyleSheet.create({
     opacity: 0.8,
     marginTop: 4,
   },
-  userGreeting: {
-    fontSize: 14,
-    color: '#ffffff',
-    opacity: 0.9,
-    marginTop: 8,
-    fontWeight: '500',
-  },
-  headerActions: {
-    alignItems: 'center',
-    gap: 12,
-  },
   logoContainer: {
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
     borderRadius: 20,
     padding: 12,
-  },
-  signOutButton: {
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    borderRadius: 16,
-    padding: 8,
   },
   section: {
     paddingHorizontal: 20,
@@ -299,11 +280,16 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 4,
   },
+  statIconContainer: {
+    borderRadius: 12,
+    padding: 8,
+    marginBottom: 8,
+  },
   statValue: {
     fontSize: 20,
     fontWeight: 'bold',
     color: '#1f2937',
-    marginTop: 8,
+    marginTop: 4,
   },
   statLabel: {
     fontSize: 12,
@@ -324,7 +310,6 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   featureIconContainer: {
-    backgroundColor: '#ecfdf5',
     borderRadius: 10,
     padding: 8,
     marginRight: 16,
@@ -377,6 +362,9 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 8,
     paddingVertical: 4,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
   },
   confidenceText: {
     fontSize: 12,

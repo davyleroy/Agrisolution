@@ -5,7 +5,6 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Modal,
   Alert,
   Linking,
   Share,
@@ -22,25 +21,14 @@ import {
   Star,
   Share2,
   ChevronRight,
-  Check,
-  X,
 } from 'lucide-react-native';
-import { useLanguage, SUPPORTED_LANGUAGES, Language } from '@/contexts/LanguageContext';
 
 export default function SettingsScreen() {
-  const { t, currentLanguage, setLanguage } = useLanguage();
-  const [showLanguageModal, setShowLanguageModal] = useState(false);
-
-  const handleLanguageSelect = async (language: Language) => {
-    await setLanguage(language);
-    setShowLanguageModal(false);
-  };
-
   const handleRateApp = () => {
     Alert.alert(
-      t('rateApp'),
+      'Rate App',
       'Thank you for using Agrisol! Please rate us on the app store.',
-      [{ text: t('ok') }]
+      [{ text: 'OK' }]
     );
   };
 
@@ -64,65 +52,65 @@ export default function SettingsScreen() {
     
     Linking.openURL(mailtoUrl).catch(() => {
       Alert.alert(
-        t('contact'),
+        'Contact',
         `Please send an email to: ${email}`,
-        [{ text: t('ok') }]
+        [{ text: 'OK' }]
       );
     });
   };
 
   const handlePrivacyPolicy = () => {
     Alert.alert(
-      t('privacyPolicy'),
+      'Privacy Policy',
       'Privacy policy will be available on our website soon.',
-      [{ text: t('ok') }]
+      [{ text: 'OK' }]
     );
   };
 
   const handleTermsOfService = () => {
     Alert.alert(
-      t('termsOfService'),
+      'Terms of Service',
       'Terms of service will be available on our website soon.',
-      [{ text: t('ok') }]
+      [{ text: 'OK' }]
     );
   };
 
   const settingsOptions = [
     {
       id: 'language',
-      title: t('language'),
-      subtitle: currentLanguage.nativeName,
+      title: 'Language',
+      subtitle: 'English',
       icon: Globe,
-      onPress: () => setShowLanguageModal(true),
+      onPress: () => Alert.alert('Language', 'Language selection coming soon!'),
       showChevron: true,
     },
     {
       id: 'about',
-      title: t('about'),
-      subtitle: t('version') + ' 1.0.0',
+      title: 'About',
+      subtitle: 'Version 1.0.0',
       icon: Info,
       onPress: () => Alert.alert(
-        t('about'),
-        'Agrisol - AI-Powered Precision Agriculture System for Sustainable Crop Management in Rwanda\n\nDeveloped by: Davy Mbuto Nkurunziza\nVersion: 1.0.0 (MVP)',
-        [{ text: t('close') }]
+        'About',
+        'Agrisol - AI-Powered Precision Agriculture System for Sustainable Crop Management\n\nDeveloped by: Davy Mbuto Nkurunziza\nVersion: 1.0.0 (MVP)',
+        [{ text: 'Close' }]
       ),
       showChevron: true,
     },
     {
       id: 'developer',
-      title: t('developer'),
+      title: 'Developer',
       subtitle: 'Davy Mbuto Nkurunziza',
       icon: User,
       onPress: () => Alert.alert(
-        t('developer'),
+        'Developer',
         'Davy Mbuto Nkurunziza\nSoftware Engineer & AI Enthusiast\n\nSpecializing in precision agriculture and sustainable farming solutions.',
-        [{ text: t('close') }]
+        [{ text: 'Close' }]
       ),
       showChevron: true,
     },
     {
       id: 'contact',
-      title: t('contact'),
+      title: 'Contact',
       subtitle: 'support@agrisol.app',
       icon: Mail,
       onPress: handleContact,
@@ -130,7 +118,7 @@ export default function SettingsScreen() {
     },
     {
       id: 'privacy',
-      title: t('privacyPolicy'),
+      title: 'Privacy Policy',
       subtitle: 'Data protection & privacy',
       icon: Shield,
       onPress: handlePrivacyPolicy,
@@ -138,7 +126,7 @@ export default function SettingsScreen() {
     },
     {
       id: 'terms',
-      title: t('termsOfService'),
+      title: 'Terms of Service',
       subtitle: 'Terms & conditions',
       icon: FileText,
       onPress: handleTermsOfService,
@@ -146,7 +134,7 @@ export default function SettingsScreen() {
     },
     {
       id: 'rate',
-      title: t('rateApp'),
+      title: 'Rate App',
       subtitle: 'Help us improve',
       icon: Star,
       onPress: handleRateApp,
@@ -154,7 +142,7 @@ export default function SettingsScreen() {
     },
     {
       id: 'share',
-      title: t('shareApp'),
+      title: 'Share App',
       subtitle: 'Tell your friends',
       icon: Share2,
       onPress: handleShareApp,
@@ -170,7 +158,7 @@ export default function SettingsScreen() {
         style={styles.header}
       >
         <SettingsIcon size={32} color="#ffffff" strokeWidth={2} />
-        <Text style={styles.title}>{t('settings')}</Text>
+        <Text style={styles.title}>Settings</Text>
         <Text style={styles.subtitle}>Customize your Agrisol experience</Text>
       </LinearGradient>
 
@@ -210,51 +198,6 @@ export default function SettingsScreen() {
           © 2024 Davy Mbuto Nkurunziza. All rights reserved.
         </Text>
       </View>
-
-      {/* Language Selection Modal */}
-      <Modal
-        visible={showLanguageModal}
-        transparent={true}
-        animationType="slide"
-        onRequestClose={() => setShowLanguageModal(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContainer}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>{t('selectLanguage')}</Text>
-              <TouchableOpacity
-                style={styles.closeButton}
-                onPress={() => setShowLanguageModal(false)}
-              >
-                <X size={24} color="#6b7280" strokeWidth={2} />
-              </TouchableOpacity>
-            </View>
-            
-            <View style={styles.languageList}>
-              {SUPPORTED_LANGUAGES.map((language) => (
-                <TouchableOpacity
-                  key={language.code}
-                  style={[
-                    styles.languageItem,
-                    currentLanguage.code === language.code && styles.selectedLanguageItem,
-                  ]}
-                  onPress={() => handleLanguageSelect(language)}
-                  activeOpacity={0.7}
-                >
-                  <Text style={styles.languageFlag}>{language.flag}</Text>
-                  <View style={styles.languageInfo}>
-                    <Text style={styles.languageName}>{language.name}</Text>
-                    <Text style={styles.languageNativeName}>{language.nativeName}</Text>
-                  </View>
-                  {currentLanguage.code === language.code && (
-                    <Check size={20} color="#059669" strokeWidth={2} />
-                  )}
-                </TouchableOpacity>
-              ))}
-            </View>
-          </View>
-        </View>
-      </Modal>
 
       <View style={styles.bottomSpacing} />
     </ScrollView>
@@ -349,65 +292,6 @@ const styles = StyleSheet.create({
     color: '#9ca3af',
     textAlign: 'center',
     lineHeight: 18,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
-  },
-  modalContainer: {
-    backgroundColor: '#ffffff',
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    paddingBottom: 40,
-    maxHeight: '70%',
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#1f2937',
-  },
-  closeButton: {
-    padding: 4,
-  },
-  languageList: {
-    paddingHorizontal: 20,
-  },
-  languageItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 16,
-    paddingHorizontal: 16,
-    borderRadius: 12,
-    marginVertical: 4,
-  },
-  selectedLanguageItem: {
-    backgroundColor: '#ecfdf5',
-  },
-  languageFlag: {
-    fontSize: 24,
-    marginRight: 16,
-  },
-  languageInfo: {
-    flex: 1,
-  },
-  languageName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#1f2937',
-    marginBottom: 2,
-  },
-  languageNativeName: {
-    fontSize: 14,
-    color: '#6b7280',
   },
   bottomSpacing: {
     height: 20,
