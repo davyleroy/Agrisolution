@@ -6,31 +6,16 @@ import {
   ScrollView,
   TouchableOpacity,
   Image,
-  Dimensions,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import {
-  BookOpen,
-  Leaf,
-  Droplets,
-  Sun,
-  Bug,
-  Shield,
-  Calendar,
-  ChevronRight,
-  Heart,
-  AlertCircle,
-  CheckCircle,
-} from 'lucide-react-native';
-
-const { width } = Dimensions.get('window');
+import { BookOpen, Leaf, Droplets, Sun, Bug, Shield, Calendar, CircleAlert as AlertCircle, CircleCheck as CheckCircle } from 'lucide-react-native';
 
 export default function GuideScreen() {
   const [selectedCategory, setSelectedCategory] = useState('diseases');
 
   const categories = [
     { id: 'diseases', label: 'Diseases', icon: AlertCircle },
-    { id: 'care', label: 'Care Tips', icon: Heart },
+    { id: 'care', label: 'Care Tips', icon: Leaf },
     { id: 'calendar', label: 'Planting', icon: Calendar },
   ];
 
@@ -57,6 +42,7 @@ export default function GuideScreen() {
       treatment: 'Apply sulfur-based fungicide, improve ventilation',
       prevention: 'Plant resistant varieties, maintain proper spacing',
     },
+<<<<<<< HEAD
     {
       id: '3',
       name: 'Bacterial Spot',
@@ -68,6 +54,8 @@ export default function GuideScreen() {
       treatment: 'Use copper sprays, remove infected plants',
       prevention: 'Use certified seeds, practice crop rotation',
     },
+=======
+>>>>>>> a0a198d86a51ddfc6a3508925e25759d5eefef86
   ];
 
   const careTips = [
@@ -95,30 +83,6 @@ export default function GuideScreen() {
         'Some crops tolerate partial shade',
       ],
     },
-    {
-      id: '3',
-      title: 'Pest Prevention',
-      icon: Bug,
-      color: '#dc2626',
-      tips: [
-        'Inspect plants regularly',
-        'Encourage beneficial insects',
-        'Use companion planting',
-        'Remove infected plants promptly',
-      ],
-    },
-    {
-      id: '4',
-      title: 'Soil Health',
-      icon: Leaf,
-      color: '#059669',
-      tips: [
-        'Test soil pH regularly',
-        'Add organic matter to soil',
-        'Practice crop rotation',
-        'Avoid walking on wet soil',
-      ],
-    },
   ];
 
   const plantingCalendar = [
@@ -132,6 +96,7 @@ export default function GuideScreen() {
       crops: ['Peas', 'Onions', 'Carrots'],
       activities: ['Start seeds indoors', 'Prune fruit trees'],
     },
+<<<<<<< HEAD
     {
       month: 'March',
       crops: ['Tomatoes', 'Peppers', 'Herbs'],
@@ -142,6 +107,8 @@ export default function GuideScreen() {
       crops: ['Beans', 'Potatoes', 'Squash', 'Corn'],
       activities: ['Direct sow warm crops', 'Install supports'],
     },
+=======
+>>>>>>> a0a198d86a51ddfc6a3508925e25759d5eefef86
   ];
 
   const getSeverityColor = (severity: string) => {
@@ -192,11 +159,14 @@ export default function GuideScreen() {
               <Text style={styles.sectionTitle}>Treatment:</Text>
               <Text style={styles.treatmentText}>{disease.treatment}</Text>
             </View>
+<<<<<<< HEAD
 
             <View style={styles.diseaseSection}>
               <Text style={styles.sectionTitle}>Prevention:</Text>
               <Text style={styles.preventionText}>{disease.prevention}</Text>
             </View>
+=======
+>>>>>>> a0a198d86a51ddfc6a3508925e25759d5eefef86
           </View>
         </View>
       ))}
@@ -446,11 +416,6 @@ const styles = StyleSheet.create({
     color: '#6b7280',
   },
   treatmentText: {
-    fontSize: 14,
-    color: '#6b7280',
-    lineHeight: 20,
-  },
-  preventionText: {
     fontSize: 14,
     color: '#6b7280',
     lineHeight: 20,

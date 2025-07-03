@@ -5,7 +5,6 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Modal,
   Alert,
   Linking,
   Share,
@@ -23,6 +22,7 @@ import {
   Star,
   Share2,
   ChevronRight,
+<<<<<<< HEAD
   Check,
   X,
   Moon,
@@ -45,11 +45,16 @@ export default function SettingsScreen() {
     setShowLanguageModal(false);
   };
 
+=======
+} from 'lucide-react-native';
+
+export default function SettingsScreen() {
+>>>>>>> a0a198d86a51ddfc6a3508925e25759d5eefef86
   const handleRateApp = () => {
     Alert.alert(
-      t('rateApp'),
+      'Rate App',
       'Thank you for using Agrisol! Please rate us on the app store.',
-      [{ text: t('ok') }]
+      [{ text: 'OK' }]
     );
   };
 
@@ -74,25 +79,33 @@ export default function SettingsScreen() {
     )}&body=${encodeURIComponent(body)}`;
 
     Linking.openURL(mailtoUrl).catch(() => {
+<<<<<<< HEAD
       Alert.alert(t('contact'), `Please send an email to: ${email}`, [
         { text: t('ok') },
       ]);
+=======
+      Alert.alert(
+        'Contact',
+        `Please send an email to: ${email}`,
+        [{ text: 'OK' }]
+      );
+>>>>>>> a0a198d86a51ddfc6a3508925e25759d5eefef86
     });
   };
 
   const handlePrivacyPolicy = () => {
     Alert.alert(
-      t('privacyPolicy'),
+      'Privacy Policy',
       'Privacy policy will be available on our website soon.',
-      [{ text: t('ok') }]
+      [{ text: 'OK' }]
     );
   };
 
   const handleTermsOfService = () => {
     Alert.alert(
-      t('termsOfService'),
+      'Terms of Service',
       'Terms of service will be available on our website soon.',
-      [{ text: t('ok') }]
+      [{ text: 'OK' }]
     );
   };
 
@@ -108,41 +121,57 @@ export default function SettingsScreen() {
     },
     {
       id: 'language',
-      title: t('language'),
-      subtitle: currentLanguage.nativeName,
+      title: 'Language',
+      subtitle: 'English',
       icon: Globe,
-      onPress: () => setShowLanguageModal(true),
+      onPress: () => Alert.alert('Language', 'Language selection coming soon!'),
       showChevron: true,
     },
     {
       id: 'about',
-      title: t('about'),
-      subtitle: t('version') + ' 1.0.0',
+      title: 'About',
+      subtitle: 'Version 1.0.0',
       icon: Info,
+<<<<<<< HEAD
       onPress: () =>
         Alert.alert(
           t('about'),
           'Agrisol - AI-Powered Precision Agriculture System for Sustainable Crop Management in Rwanda\n\nDeveloped by: Davy Mbuto Nkurunziza\nVersion: 1.0.0 (MVP)',
           [{ text: t('close') }]
         ),
+=======
+      onPress: () => Alert.alert(
+        'About',
+        'Agrisol - AI-Powered Precision Agriculture System for Sustainable Crop Management\n\nDeveloped by: Davy Mbuto Nkurunziza\nVersion: 1.0.0 (MVP)',
+        [{ text: 'Close' }]
+      ),
+>>>>>>> a0a198d86a51ddfc6a3508925e25759d5eefef86
       showChevron: true,
     },
     {
       id: 'developer',
-      title: t('developer'),
+      title: 'Developer',
       subtitle: 'Davy Mbuto Nkurunziza',
       icon: User,
+<<<<<<< HEAD
       onPress: () =>
         Alert.alert(
           t('developer'),
           'Davy Mbuto Nkurunziza\nSoftware Engineer & AI Enthusiast\n\nSpecializing in precision agriculture and sustainable farming solutions.',
           [{ text: t('close') }]
         ),
+=======
+      onPress: () => Alert.alert(
+        'Developer',
+        'Davy Mbuto Nkurunziza\nSoftware Engineer & AI Enthusiast\n\nSpecializing in precision agriculture and sustainable farming solutions.',
+        [{ text: 'Close' }]
+      ),
+>>>>>>> a0a198d86a51ddfc6a3508925e25759d5eefef86
       showChevron: true,
     },
     {
       id: 'contact',
-      title: t('contact'),
+      title: 'Contact',
       subtitle: 'support@agrisol.app',
       icon: Mail,
       onPress: handleContact,
@@ -150,7 +179,7 @@ export default function SettingsScreen() {
     },
     {
       id: 'privacy',
-      title: t('privacyPolicy'),
+      title: 'Privacy Policy',
       subtitle: 'Data protection & privacy',
       icon: Shield,
       onPress: handlePrivacyPolicy,
@@ -158,7 +187,7 @@ export default function SettingsScreen() {
     },
     {
       id: 'terms',
-      title: t('termsOfService'),
+      title: 'Terms of Service',
       subtitle: 'Terms & conditions',
       icon: FileText,
       onPress: handleTermsOfService,
@@ -166,7 +195,7 @@ export default function SettingsScreen() {
     },
     {
       id: 'rate',
-      title: t('rateApp'),
+      title: 'Rate App',
       subtitle: 'Help us improve',
       icon: Star,
       onPress: handleRateApp,
@@ -174,7 +203,7 @@ export default function SettingsScreen() {
     },
     {
       id: 'share',
-      title: t('shareApp'),
+      title: 'Share App',
       subtitle: 'Tell your friends',
       icon: Share2,
       onPress: handleShareApp,
@@ -190,7 +219,7 @@ export default function SettingsScreen() {
       {/* Header */}
       <LinearGradient colors={['#374151', '#4b5563']} style={styles.header}>
         <SettingsIcon size={32} color="#ffffff" strokeWidth={2} />
-        <Text style={styles.title}>{t('settings')}</Text>
+        <Text style={styles.title}>Settings</Text>
         <Text style={styles.subtitle}>Customize your Agrisol experience</Text>
       </LinearGradient>
 
@@ -266,6 +295,7 @@ export default function SettingsScreen() {
         </Text>
       </View>
 
+<<<<<<< HEAD
       {/* Language Selection Modal */}
       <Modal
         visible={showLanguageModal}
@@ -330,6 +360,8 @@ export default function SettingsScreen() {
         </View>
       </Modal>
 
+=======
+>>>>>>> a0a198d86a51ddfc6a3508925e25759d5eefef86
       <View style={styles.bottomSpacing} />
     </ScrollView>
   );
@@ -414,6 +446,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 18,
   },
+<<<<<<< HEAD
   modalOverlay: {
     flex: 1,
     justifyContent: 'flex-end',
@@ -464,6 +497,8 @@ const styles = StyleSheet.create({
   languageNativeName: {
     fontSize: 14,
   },
+=======
+>>>>>>> a0a198d86a51ddfc6a3508925e25759d5eefef86
   bottomSpacing: {
     height: 20,
   },

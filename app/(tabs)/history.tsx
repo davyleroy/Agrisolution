@@ -6,20 +6,9 @@ import {
   ScrollView,
   TouchableOpacity,
   Image,
-  Dimensions,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import {
-  Calendar,
-  TrendingUp,
-  Leaf,
-  AlertTriangle,
-  Clock,
-  Filter,
-  Search,
-} from 'lucide-react-native';
-
-const { width } = Dimensions.get('window');
+import { Calendar, TrendingUp, Leaf, TriangleAlert as AlertTriangle, Clock, Filter, Search } from 'lucide-react-native';
 
 export default function HistoryScreen() {
   const [filter, setFilter] = useState('all');
@@ -58,6 +47,7 @@ export default function HistoryScreen() {
       status: 'healthy',
       crop: 'Bean',
     },
+<<<<<<< HEAD
     {
       id: '4',
       date: '2024-01-12',
@@ -69,6 +59,8 @@ export default function HistoryScreen() {
       status: 'disease',
       crop: 'Tomato',
     },
+=======
+>>>>>>> a0a198d86a51ddfc6a3508925e25759d5eefef86
   ];
 
   const stats = [
@@ -213,6 +205,7 @@ export default function HistoryScreen() {
         })}
       </View>
 
+<<<<<<< HEAD
       {/* Empty State */}
       {filteredData.length === 0 && (
         <View style={styles.emptyContainer}>
@@ -225,6 +218,8 @@ export default function HistoryScreen() {
         </View>
       )}
 
+=======
+>>>>>>> a0a198d86a51ddfc6a3508925e25759d5eefef86
       <View style={styles.bottomSpacing} />
     </ScrollView>
   );
@@ -387,24 +382,6 @@ const styles = StyleSheet.create({
     fontSize: 10,
     color: '#374151',
     fontWeight: '500',
-  },
-  emptyContainer: {
-    alignItems: 'center',
-    paddingVertical: 60,
-    paddingHorizontal: 40,
-  },
-  emptyTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#374151',
-    marginTop: 16,
-    marginBottom: 8,
-  },
-  emptyText: {
-    fontSize: 14,
-    color: '#6b7280',
-    textAlign: 'center',
-    lineHeight: 20,
   },
   bottomSpacing: {
     height: 20,

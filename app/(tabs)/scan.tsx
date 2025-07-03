@@ -1,44 +1,25 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
   Alert,
-  Animated,
   Dimensions,
+  Platform,
 } from 'react-native';
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
 import { LinearGradient } from 'expo-linear-gradient';
-import { router, useLocalSearchParams } from 'expo-router';
-import { Camera, Image as ImageIcon, FlipHorizontal, Zap, X, CircleCheck as CheckCircle } from 'lucide-react-native';
-import { useLanguage } from '@/contexts/LanguageContext';
-import { SUPPORTED_CROPS } from '@/services/mlService';
+import { Camera, Image as ImageIcon, FlipHorizontal, X, CircleCheck as CheckCircle, Zap } from 'lucide-react-native';
 
 const { width, height } = Dimensions.get('window');
 
 export default function ScanScreen() {
-  const { t } = useLanguage();
-  const params = useLocalSearchParams();
-  const cropType = params.cropType as string;
-  const imageSource = params.imageSource as string;
-  
   const [facing, setFacing] = useState<CameraType>('back');
   const [permission, requestPermission] = useCameraPermissions();
   const [isCapturing, setIsCapturing] = useState(false);
   const [showCamera, setShowCamera] = useState(false);
-  const scaleAnim = useRef(new Animated.Value(1)).current;
-
-  const selectedCrop = SUPPORTED_CROPS.find(crop => crop.id === cropType);
-
-  React.useEffect(() => {
-    if (imageSource === 'camera') {
-      setShowCamera(true);
-    } else if (imageSource === 'gallery') {
-      pickImage();
-    }
-  }, [imageSource]);
 
   if (!permission) {
     return <View style={styles.container} />;
@@ -52,15 +33,15 @@ export default function ScanScreen() {
           style={styles.permissionGradient}
         >
           <Camera size={64} color="#ffffff" strokeWidth={1.5} />
-          <Text style={styles.permissionTitle}>{t('cameraAccessRequired')}</Text>
+          <Text style={styles.permissionTitle}>Camera Access Required</Text>
           <Text style={styles.permissionText}>
-            {t('cameraPermissionDesc')}
+            We need camera access to capture images of your crops for analysis.
           </Text>
           <TouchableOpacity
             style={styles.permissionButton}
             onPress={requestPermission}
           >
-            <Text style={styles.permissionButtonText}>{t('grantPermission')}</Text>
+            <Text style={styles.permissionButtonText}>Grant Permission</Text>
           </TouchableOpacity>
         </LinearGradient>
       </View>
@@ -71,30 +52,14 @@ export default function ScanScreen() {
     setFacing(current => (current === 'back' ? 'front' : 'back'));
   };
 
-  const animateCapture = () => {
-    Animated.sequence([
-      Animated.timing(scaleAnim, {
-        toValue: 0.9,
-        duration: 100,
-        useNativeDriver: true,
-      }),
-      Animated.timing(scaleAnim, {
-        toValue: 1,
-        duration: 100,
-        useNativeDriver: true,
-      }),
-    ]).start();
-  };
-
   const captureImage = async () => {
     if (isCapturing) return;
     
     setIsCapturing(true);
-    animateCapture();
     
     // Simulate capture and processing
     setTimeout(() => {
-      navigateToResults('mock_image_uri');
+      Alert.alert('Success', 'Image captured successfully!');
       setIsCapturing(false);
     }, 1000);
   };
@@ -109,25 +74,12 @@ export default function ScanScreen() {
       });
 
       if (!result.canceled && result.assets[0]) {
-        navigateToResults(result.assets[0].uri);
-      } else {
-        router.back();
+        Alert.alert('Success', 'Image selected successfully!');
       }
     } catch (error) {
       console.error('Error picking image:', error);
-      Alert.alert(t('error'), t('errorPickingImage'));
-      router.back();
+      Alert.alert('Error', 'Failed to select image');
     }
-  };
-
-  const navigateToResults = (imageUri: string) => {
-    router.push({
-      pathname: '/results',
-      params: {
-        imageUri,
-        cropType: selectedCrop?.id || 'unknown',
-      },
-    });
   };
 
   if (!showCamera) {
@@ -138,9 +90,9 @@ export default function ScanScreen() {
           style={styles.choiceContainer}
         >
           <View style={styles.header}>
-            <Text style={styles.title}>{t('scanYourCrop')}</Text>
+            <Text style={styles.title}>Scan Your Crop</Text>
             <Text style={styles.subtitle}>
-              {t('scanSubtitle')}
+              Choose how you'd like to capture or select your crop image
             </Text>
           </View>
 
@@ -155,9 +107,9 @@ export default function ScanScreen() {
                 style={styles.optionGradient}
               >
                 <Camera size={48} color="#ffffff" strokeWidth={1.5} />
-                <Text style={styles.optionTitle}>{t('takePhoto')}</Text>
+                <Text style={styles.optionTitle}>Take Photo</Text>
                 <Text style={styles.optionDescription}>
-                  {t('captureImage')}
+                  Capture crop image with camera
                 </Text>
               </LinearGradient>
             </TouchableOpacity>
@@ -172,40 +124,27 @@ export default function ScanScreen() {
                 style={styles.optionGradient}
               >
                 <ImageIcon size={48} color="#ffffff" strokeWidth={1.5} />
-                <Text style={styles.optionTitle}>{t('chooseFromGallery')}</Text>
+                <Text style={styles.optionTitle}>Choose from Gallery</Text>
                 <Text style={styles.optionDescription}>
-                  {t('selectFromGallery')}
+                  Select existing photo from gallery
                 </Text>
               </LinearGradient>
             </TouchableOpacity>
           </View>
 
-          {selectedCrop && (
-            <View style={styles.cropInfoContainer}>
-              <Text style={styles.cropInfoTitle}>{t('selectedCrop')}</Text>
-              <View style={styles.cropInfoCard}>
-                <Text style={styles.cropInfoEmoji}>{selectedCrop.icon}</Text>
-                <View style={styles.cropInfoText}>
-                  <Text style={styles.cropInfoName}>{t(selectedCrop.id)}</Text>
-                  <Text style={styles.cropInfoScientific}>{selectedCrop.scientificName}</Text>
-                </View>
-              </View>
-            </View>
-          )}
-
           <View style={styles.tipsContainer}>
-            <Text style={styles.tipsTitle}>{t('tipsForBetter')}</Text>
+            <Text style={styles.tipsTitle}>Tips for Better Results</Text>
             <View style={styles.tip}>
               <CheckCircle size={16} color="#059669" strokeWidth={2} />
-              <Text style={styles.tipText}>{t('ensureGoodLighting')}</Text>
+              <Text style={styles.tipText}>Ensure good lighting</Text>
             </View>
             <View style={styles.tip}>
               <CheckCircle size={16} color="#059669" strokeWidth={2} />
-              <Text style={styles.tipText}>{t('focusOnAffected')}</Text>
+              <Text style={styles.tipText}>Focus on affected areas</Text>
             </View>
             <View style={styles.tip}>
               <CheckCircle size={16} color="#059669" strokeWidth={2} />
-              <Text style={styles.tipText}>{t('keepCameraStady')}</Text>
+              <Text style={styles.tipText}>Keep camera steady</Text>
             </View>
           </View>
         </LinearGradient>
@@ -225,13 +164,6 @@ export default function ScanScreen() {
             <X size={24} color="#ffffff" strokeWidth={2} />
           </TouchableOpacity>
           
-          {selectedCrop && (
-            <View style={styles.cropIndicator}>
-              <Text style={styles.cropIndicatorEmoji}>{selectedCrop.icon}</Text>
-              <Text style={styles.cropIndicatorText}>{t(selectedCrop.id)}</Text>
-            </View>
-          )}
-          
           <TouchableOpacity
             style={styles.flipButton}
             onPress={toggleCameraFacing}
@@ -244,7 +176,7 @@ export default function ScanScreen() {
         <View style={styles.overlay}>
           <View style={styles.guideBorder} />
           <Text style={styles.guideText}>
-            {t('positionPlantCenter')}
+            Position the plant leaf in the center
           </Text>
         </View>
 
@@ -257,24 +189,22 @@ export default function ScanScreen() {
             <ImageIcon size={24} color="#ffffff" strokeWidth={2} />
           </TouchableOpacity>
 
-          <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
-            <TouchableOpacity
-              style={[
-                styles.captureButton,
-                isCapturing && styles.capturingButton,
-              ]}
-              onPress={captureImage}
-              disabled={isCapturing}
-            >
-              <View style={styles.captureInner}>
-                {isCapturing ? (
-                  <Zap size={32} color="#ffffff" strokeWidth={2} />
-                ) : (
-                  <Camera size={32} color="#ffffff" strokeWidth={2} />
-                )}
-              </View>
-            </TouchableOpacity>
-          </Animated.View>
+          <TouchableOpacity
+            style={[
+              styles.captureButton,
+              isCapturing && styles.capturingButton,
+            ]}
+            onPress={captureImage}
+            disabled={isCapturing}
+          >
+            <View style={styles.captureInner}>
+              {isCapturing ? (
+                <Zap size={32} color="#ffffff" strokeWidth={2} />
+              ) : (
+                <Camera size={32} color="#ffffff" strokeWidth={2} />
+              )}
+            </View>
+          </TouchableOpacity>
 
           <View style={styles.placeholder} />
         </View>
@@ -377,45 +307,6 @@ const styles = StyleSheet.create({
     opacity: 0.9,
     textAlign: 'center',
   },
-  cropInfoContainer: {
-    marginBottom: 30,
-  },
-  cropInfoTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#1f2937',
-    marginBottom: 12,
-  },
-  cropInfoCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#ffffff',
-    borderRadius: 12,
-    padding: 16,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-  },
-  cropInfoEmoji: {
-    fontSize: 32,
-    marginRight: 16,
-  },
-  cropInfoText: {
-    flex: 1,
-  },
-  cropInfoName: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#1f2937',
-    marginBottom: 2,
-  },
-  cropInfoScientific: {
-    fontSize: 14,
-    color: '#6b7280',
-    fontStyle: 'italic',
-  },
   tipsContainer: {
     backgroundColor: '#ffffff',
     borderRadius: 16,
@@ -456,23 +347,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     borderRadius: 20,
     padding: 8,
-  },
-  cropIndicator: {
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    borderRadius: 20,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  cropIndicatorEmoji: {
-    fontSize: 20,
-    marginRight: 8,
-  },
-  cropIndicatorText: {
-    fontSize: 14,
-    color: '#ffffff',
-    fontWeight: '600',
   },
   flipButton: {
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
