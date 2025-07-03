@@ -141,52 +141,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const signIn = async (email: string, password: string) => {
-    // Mock users
-    const mockUsers = [
-      {
-        id: '1',
-        email: 'user1@test.com',
-        password: 'password123',
-        user_metadata: { full_name: 'Test User 1' },
-      },
-      {
-        id: '2',
-        email: 'user2@test.com',
-        password: 'password123',
-        user_metadata: { full_name: 'Test User 2' },
-      },
-    ];
-
-    const matchedUser = mockUsers.find(
-      (u) =>
-        u.email.toLowerCase() === email.toLowerCase() && u.password === password
-    );
-
-    if (matchedUser) {
-      // Simulate a successful login by setting the user state
-      setUser(matchedUser as unknown as User);
-      setSession({
-        user: matchedUser,
-        expires_at: 0,
-        expires_in: 0,
-        refresh_token: '',
-        access_token: '',
-      } as unknown as Session);
-      return { error: null };
-    }
-
-    // Fallback to Supabase for non-mock users, or just return an error if you want to disable it.
-    // For now, let's just show an error for any other credentials.
-    return { error: { message: 'Invalid credentials' } };
-
-    // Original Supabase call (can be restored later)
-    /*
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
     return { error };
-    */
   };
 
   const signOut = async () => {
