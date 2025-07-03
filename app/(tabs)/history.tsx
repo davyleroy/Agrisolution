@@ -29,7 +29,8 @@ export default function HistoryScreen() {
       id: '1',
       date: '2024-01-15',
       time: '14:30',
-      image: 'https://images.pexels.com/photos/1459534/pexels-photo-1459534.jpeg?auto=compress&cs=tinysrgb&w=300',
+      image:
+        'https://images.pexels.com/photos/1459534/pexels-photo-1459534.jpeg?auto=compress&cs=tinysrgb&w=300',
       disease: 'Healthy Plant',
       confidence: 94,
       status: 'healthy',
@@ -39,7 +40,8 @@ export default function HistoryScreen() {
       id: '2',
       date: '2024-01-14',
       time: '09:15',
-      image: 'https://images.pexels.com/photos/1153655/pexels-photo-1153655.jpeg?auto=compress&cs=tinysrgb&w=300',
+      image:
+        'https://images.pexels.com/photos/1153655/pexels-photo-1153655.jpeg?auto=compress&cs=tinysrgb&w=300',
       disease: 'Early Blight',
       confidence: 87,
       status: 'disease',
@@ -49,7 +51,8 @@ export default function HistoryScreen() {
       id: '3',
       date: '2024-01-13',
       time: '16:45',
-      image: 'https://images.pexels.com/photos/1459534/pexels-photo-1459534.jpeg?auto=compress&cs=tinysrgb&w=300',
+      image:
+        'https://images.pexels.com/photos/1459534/pexels-photo-1459534.jpeg?auto=compress&cs=tinysrgb&w=300',
       disease: 'Healthy Plant',
       confidence: 92,
       status: 'healthy',
@@ -59,7 +62,8 @@ export default function HistoryScreen() {
       id: '4',
       date: '2024-01-12',
       time: '11:20',
-      image: 'https://images.pexels.com/photos/1153655/pexels-photo-1153655.jpeg?auto=compress&cs=tinysrgb&w=300',
+      image:
+        'https://images.pexels.com/photos/1153655/pexels-photo-1153655.jpeg?auto=compress&cs=tinysrgb&w=300',
       disease: 'Leaf Spot',
       confidence: 79,
       status: 'disease',
@@ -94,9 +98,10 @@ export default function HistoryScreen() {
     { id: 'disease', label: 'Issues', count: 6 },
   ];
 
-  const filteredData = filter === 'all' 
-    ? historyData 
-    : historyData.filter(item => item.status === filter);
+  const filteredData =
+    filter === 'all'
+      ? historyData
+      : historyData.filter((item) => item.status === filter);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -123,10 +128,7 @@ export default function HistoryScreen() {
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       {/* Header */}
-      <LinearGradient
-        colors={['#1f2937', '#374151']}
-        style={styles.header}
-      >
+      <LinearGradient colors={['#1f2937', '#374151']} style={styles.header}>
         <Text style={styles.title}>Scan History</Text>
         <Text style={styles.subtitle}>Track your crop health over time</Text>
       </LinearGradient>
@@ -135,7 +137,9 @@ export default function HistoryScreen() {
       <View style={styles.statsContainer}>
         {stats.map((stat, index) => (
           <View key={index} style={styles.statCard}>
-            <View style={[styles.statIcon, { backgroundColor: `${stat.color}20` }]}>
+            <View
+              style={[styles.statIcon, { backgroundColor: `${stat.color}20` }]}
+            >
               <stat.icon size={24} color={stat.color} strokeWidth={2} />
             </View>
             <Text style={styles.statValue}>{stat.value}</Text>
@@ -176,7 +180,7 @@ export default function HistoryScreen() {
           return (
             <TouchableOpacity key={item.id} style={styles.historyCard}>
               <Image source={{ uri: item.image }} style={styles.historyImage} />
-              
+
               <View style={styles.historyContent}>
                 <View style={styles.historyHeader}>
                   <Text style={styles.historyTitle}>{item.crop}</Text>
@@ -185,16 +189,16 @@ export default function HistoryScreen() {
                     <Text style={styles.timeText}>{item.time}</Text>
                   </View>
                 </View>
-                
+
                 <View style={styles.diseaseContainer}>
-                  <StatusIcon 
-                    size={16} 
-                    color={getStatusColor(item.status)} 
-                    strokeWidth={2} 
+                  <StatusIcon
+                    size={16}
+                    color={getStatusColor(item.status)}
+                    strokeWidth={2}
                   />
                   <Text style={styles.diseaseText}>{item.disease}</Text>
                 </View>
-                
+
                 <View style={styles.historyFooter}>
                   <Text style={styles.dateText}>{item.date}</Text>
                   <View style={styles.confidenceContainer}>
@@ -215,7 +219,8 @@ export default function HistoryScreen() {
           <Search size={48} color="#6b7280" strokeWidth={1} />
           <Text style={styles.emptyTitle}>No scans found</Text>
           <Text style={styles.emptyText}>
-            No scans match your current filter. Try selecting a different filter.
+            No scans match your current filter. Try selecting a different
+            filter.
           </Text>
         </View>
       )}

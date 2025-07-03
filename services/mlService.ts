@@ -10,12 +10,22 @@ export interface CropType {
 
 export const SUPPORTED_CROPS: CropType[] = [
   {
+    id: 'potatoes',
+    name: 'Potatoes',
+    scientificName: 'Solanum tuberosum',
+    icon: '🥔',
+    description:
+      'Potato plants including russet, red, and fingerling varieties',
+    commonDiseases: ['Early Blight', 'Late Blight', 'Healthy'],
+    modelEndpoint: '/api/ml/potatoes',
+  },
+  {
     id: 'beans',
     name: 'Beans',
     scientificName: 'Phaseolus vulgaris',
     icon: '🫘',
     description: 'Common beans including kidney, black, and pinto varieties',
-    commonDiseases: ['Bean Rust', 'Bacterial Blight', 'Anthracnose', 'Mosaic Virus'],
+    commonDiseases: ['Bean Rust', 'Angular Leaf Spot', 'Healthy'],
     modelEndpoint: '/api/ml/beans',
   },
   {
@@ -24,7 +34,12 @@ export const SUPPORTED_CROPS: CropType[] = [
     scientificName: 'Zea mays',
     icon: '🌽',
     description: 'Corn plants including sweet corn and field corn varieties',
-    commonDiseases: ['Northern Corn Leaf Blight', 'Gray Leaf Spot', 'Common Rust', 'Ear Rot'],
+    commonDiseases: [
+      'Northern Corn Leaf Blight',
+      'Gray Leaf Spot',
+      'Common Rust',
+      'Ear Rot',
+    ],
     modelEndpoint: '/api/ml/maize',
   },
   {
@@ -32,8 +47,14 @@ export const SUPPORTED_CROPS: CropType[] = [
     name: 'Tomatoes',
     scientificName: 'Solanum lycopersicum',
     icon: '🍅',
-    description: 'Tomato plants including cherry, beefsteak, and roma varieties',
-    commonDiseases: ['Early Blight', 'Late Blight', 'Bacterial Spot', 'Fusarium Wilt'],
+    description:
+      'Tomato plants including cherry, beefsteak, and roma varieties',
+    commonDiseases: [
+      'Early Blight',
+      'Late Blight',
+      'Bacterial Spot',
+      'Fusarium Wilt',
+    ],
     modelEndpoint: '/api/ml/tomatoes',
   },
 ];
@@ -59,16 +80,31 @@ class MLService {
   private apiKey: string;
 
   constructor() {
-    this.baseUrl = process.env.EXPO_PUBLIC_ML_API_URL || 'https://api.example.com';
-    this.apiKey = process.env.EXPO_PUBLIC_ML_API_KEY || '';
+    this.baseUrl =
+      process.env.EXPO_PUBLIC_ML_API_URL || 'http://localhost:5000';
+    this.apiKey = process.env.EXPO_PUBLIC_ML_API_KEY || 'agrisol-api-key-2024';
 
     // Validate environment variables
-    if (!process.env.EXPO_PUBLIC_ML_API_URL || process.env.EXPO_PUBLIC_ML_API_URL === 'your_ml_api_url_here') {
-      console.warn('EXPO_PUBLIC_ML_API_URL is not properly configured. Using mock predictions.');
+    console.log('🔧 ML Service Configuration:');
+    console.log('API URL:', this.baseUrl);
+    console.log('API Key configured:', !!this.apiKey);
+
+    if (
+      !process.env.EXPO_PUBLIC_ML_API_URL ||
+      process.env.EXPO_PUBLIC_ML_API_URL === 'your_ml_api_url_here'
+    ) {
+      console.warn(
+        '⚠️  EXPO_PUBLIC_ML_API_URL is not properly configured. Using default localhost.'
+      );
     }
 
-    if (!process.env.EXPO_PUBLIC_ML_API_KEY || process.env.EXPO_PUBLIC_ML_API_KEY === 'your_ml_api_key_here') {
-      console.warn('EXPO_PUBLIC_ML_API_KEY is not properly configured. Using mock predictions.');
+    if (
+      !process.env.EXPO_PUBLIC_ML_API_KEY ||
+      process.env.EXPO_PUBLIC_ML_API_KEY === 'your_ml_api_key_here'
+    ) {
+      console.warn(
+        '⚠️  EXPO_PUBLIC_ML_API_KEY is not properly configured. Using default key.'
+      );
     }
   }
 
@@ -77,13 +113,8 @@ class MLService {
     cropType: CropType
   ): Promise<MLAnalysisResult> {
     try {
-      // If environment variables are not properly configured, return mock data
-      if (!process.env.EXPO_PUBLIC_ML_API_URL || 
-          process.env.EXPO_PUBLIC_ML_API_URL === 'your_ml_api_url_here' ||
-          !process.env.EXPO_PUBLIC_ML_API_KEY || 
-          process.env.EXPO_PUBLIC_ML_API_KEY === 'your_ml_api_key_here') {
-        return this.getMockPrediction(cropType);
-      }
+      // For development, always try the real API first, fallback to mock if it fails
+      console.log('🚀 Attempting to analyze image with real API...');
 
       const startTime = Date.now();
 
@@ -94,13 +125,16 @@ class MLService {
         type: 'image/jpeg',
         name: 'crop_image.jpg',
       } as any);
-      formData.append('crop_type', cropType.id);
+
+      console.log(
+        `📡 Making request to: ${this.baseUrl}${cropType.modelEndpoint}`
+      );
 
       const response = await fetch(`${this.baseUrl}${cropType.modelEndpoint}`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${this.apiKey}`,
-          'Content-Type': 'multipart/form-data',
+          // Remove Content-Type header to let the browser set it automatically for FormData
+          // 'Content-Type': 'multipart/form-data', // This can cause issues with boundary
         },
         body: formData,
       });
@@ -119,20 +153,30 @@ class MLService {
       };
     } catch (error) {
       console.error('ML Analysis Error:', error);
-      
+
       // Return mock data for development/demo purposes
       return this.getMockPrediction(cropType);
     }
   }
 
   private formatPrediction(apiResult: any, cropType: CropType): MLPrediction {
+    console.log('🔄 Formatting API result:', apiResult);
+
     return {
       disease: apiResult.predicted_class || 'Unknown',
-      confidence: Math.round((apiResult.confidence || 0.85) * 100),
+      confidence: Math.round(
+        apiResult.confidence_percentage || apiResult.confidence || 85
+      ),
       severity: this.determineSeverity(apiResult.confidence),
-      recommendations: this.generateRecommendations(apiResult.predicted_class, cropType),
-      treatmentUrgency: this.determineTreatmentUrgency(apiResult.predicted_class),
-      estimatedRecovery: this.estimateRecoveryTime(apiResult.predicted_class),
+      recommendations:
+        apiResult.recommendations ||
+        this.generateRecommendations(apiResult.predicted_class, cropType),
+      treatmentUrgency:
+        apiResult.treatment_urgency ||
+        this.determineTreatmentUrgency(apiResult.predicted_class),
+      estimatedRecovery:
+        apiResult.estimated_recovery ||
+        this.estimateRecoveryTime(apiResult.predicted_class),
     };
   }
 
@@ -142,28 +186,35 @@ class MLService {
     return 'Low';
   }
 
-  private determineTreatmentUrgency(disease: string): 'None' | 'Low' | 'Medium' | 'High' {
+  private determineTreatmentUrgency(
+    disease: string
+  ): 'None' | 'Low' | 'Medium' | 'High' {
     const urgentDiseases = ['late blight', 'bacterial blight', 'fusarium wilt'];
     const moderateDiseases = ['early blight', 'rust', 'leaf spot'];
-    
+
     const diseaseLower = disease.toLowerCase();
-    
+
     if (diseaseLower.includes('healthy')) return 'None';
-    if (urgentDiseases.some(d => diseaseLower.includes(d))) return 'High';
-    if (moderateDiseases.some(d => diseaseLower.includes(d))) return 'Medium';
+    if (urgentDiseases.some((d) => diseaseLower.includes(d))) return 'High';
+    if (moderateDiseases.some((d) => diseaseLower.includes(d))) return 'Medium';
     return 'Low';
   }
 
   private estimateRecoveryTime(disease: string): string {
     const diseaseLower = disease.toLowerCase();
-    
+
     if (diseaseLower.includes('healthy')) return 'N/A';
-    if (diseaseLower.includes('virus') || diseaseLower.includes('wilt')) return '4-6 weeks';
-    if (diseaseLower.includes('blight') || diseaseLower.includes('rust')) return '2-3 weeks';
+    if (diseaseLower.includes('virus') || diseaseLower.includes('wilt'))
+      return '4-6 weeks';
+    if (diseaseLower.includes('blight') || diseaseLower.includes('rust'))
+      return '2-3 weeks';
     return '1-2 weeks';
   }
 
-  private generateRecommendations(disease: string, cropType: CropType): string[] {
+  private generateRecommendations(
+    disease: string,
+    cropType: CropType
+  ): string[] {
     const diseaseLower = disease.toLowerCase();
     const baseRecommendations = [
       'Monitor plant regularly for changes',
@@ -221,12 +272,19 @@ class MLService {
   // Mock prediction for development/demo
   private getMockPrediction(cropType: CropType): MLAnalysisResult {
     const mockDiseases = {
-      beans: ['Healthy Bean Plant', 'Bean Rust', 'Bacterial Blight'],
-      maize: ['Healthy Corn Plant', 'Northern Corn Leaf Blight', 'Gray Leaf Spot'],
+      potatoes: ['Healthy Potato Plant', 'Early Blight', 'Late Blight'],
+      beans: ['Healthy Bean Plant', 'Bean Rust', 'Angular Leaf Spot'],
+      maize: [
+        'Healthy Corn Plant',
+        'Northern Corn Leaf Blight',
+        'Gray Leaf Spot',
+      ],
       tomatoes: ['Healthy Tomato Plant', 'Early Blight', 'Late Blight'],
     };
 
-    const diseases = mockDiseases[cropType.id as keyof typeof mockDiseases] || ['Healthy Plant'];
+    const diseases = mockDiseases[cropType.id as keyof typeof mockDiseases] || [
+      'Healthy Plant',
+    ];
     const randomDisease = diseases[Math.floor(Math.random() * diseases.length)];
     const confidence = 0.75 + Math.random() * 0.2; // 75-95% confidence
 

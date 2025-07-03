@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -10,7 +10,18 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import { Camera, Image as ImageIcon, Leaf, TrendingUp, Shield, Award, ArrowRight, Sun, Droplets, LogOut } from 'lucide-react-native';
+import {
+  Camera,
+  Image as ImageIcon,
+  Leaf,
+  TrendingUp,
+  Shield,
+  Award,
+  ArrowRight,
+  Sun,
+  Droplets,
+  LogOut,
+} from 'lucide-react-native';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -20,15 +31,8 @@ export default function HomeScreen() {
   const { t } = useLanguage();
   const { user, signOut } = useAuth();
 
-  useEffect(() => {
-    // Redirect to sign-in if not authenticated
-    if (!user) {
-      router.replace('/(auth)/sign-in');
-    }
-  }, [user]);
-
   if (!user) {
-    return null; // Show nothing while redirecting
+    return null; // Keep this to avoid rendering the screen while redirecting
   }
 
   const quickActions = [
@@ -38,7 +42,7 @@ export default function HomeScreen() {
       subtitle: t('captureImage'),
       icon: Camera,
       color: '#059669',
-      gradient: ['#059669', '#10b981'],
+      gradient: ['#059669', '#10b981'] as const,
       onPress: () => router.push('/crop-selection?imageSource=camera'),
     },
     {
@@ -47,7 +51,7 @@ export default function HomeScreen() {
       subtitle: t('selectExisting'),
       icon: ImageIcon,
       color: '#2563eb',
-      gradient: ['#2563eb', '#3b82f6'],
+      gradient: ['#2563eb', '#3b82f6'] as const,
       onPress: () => router.push('/crop-selection?imageSource=gallery'),
     },
   ];
@@ -103,7 +107,10 @@ export default function HomeScreen() {
             <View style={styles.logoContainer}>
               <Leaf size={40} color="#ffffff" strokeWidth={2} />
             </View>
-            <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
+            <TouchableOpacity
+              style={styles.signOutButton}
+              onPress={handleSignOut}
+            >
               <LogOut size={20} color="#ffffff" strokeWidth={2} />
             </TouchableOpacity>
           </View>
@@ -161,7 +168,9 @@ export default function HomeScreen() {
             </View>
             <View style={styles.featureContent}>
               <Text style={styles.featureTitle}>{feature.title}</Text>
-              <Text style={styles.featureDescription}>{feature.description}</Text>
+              <Text style={styles.featureDescription}>
+                {feature.description}
+              </Text>
             </View>
           </View>
         ))}

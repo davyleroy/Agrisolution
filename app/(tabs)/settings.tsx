@@ -9,6 +9,7 @@ import {
   Alert,
   Linking,
   Share,
+  Switch,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import {
@@ -24,11 +25,19 @@ import {
   ChevronRight,
   Check,
   X,
+  Moon,
+  Sun,
 } from 'lucide-react-native';
-import { useLanguage, SUPPORTED_LANGUAGES, Language } from '@/contexts/LanguageContext';
+import {
+  useLanguage,
+  SUPPORTED_LANGUAGES,
+  Language,
+} from '@/contexts/LanguageContext';
+import { useTheme } from '@/contexts/ThemeContext';
 
 export default function SettingsScreen() {
   const { t, currentLanguage, setLanguage } = useLanguage();
+  const { colors, isDarkMode, toggleDarkMode } = useTheme();
   const [showLanguageModal, setShowLanguageModal] = useState(false);
 
   const handleLanguageSelect = async (language: Language) => {
@@ -59,15 +68,15 @@ export default function SettingsScreen() {
     const email = 'support@agrisol.app';
     const subject = 'Agrisol App Support';
     const body = 'Hello Agrisol Team,\n\nI need help with...';
-    
-    const mailtoUrl = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    
+
+    const mailtoUrl = `mailto:${email}?subject=${encodeURIComponent(
+      subject
+    )}&body=${encodeURIComponent(body)}`;
+
     Linking.openURL(mailtoUrl).catch(() => {
-      Alert.alert(
-        t('contact'),
-        `Please send an email to: ${email}`,
-        [{ text: t('ok') }]
-      );
+      Alert.alert(t('contact'), `Please send an email to: ${email}`, [
+        { text: t('ok') },
+      ]);
     });
   };
 
@@ -89,6 +98,15 @@ export default function SettingsScreen() {
 
   const settingsOptions = [
     {
+      id: 'darkmode',
+      title: isDarkMode ? t('lightMode') : t('darkMode'),
+      subtitle: isDarkMode ? t('switchToLight') : t('switchToDark'),
+      icon: isDarkMode ? Sun : Moon,
+      onPress: toggleDarkMode,
+      showChevron: false,
+      showToggle: true,
+    },
+    {
       id: 'language',
       title: t('language'),
       subtitle: currentLanguage.nativeName,
@@ -101,11 +119,12 @@ export default function SettingsScreen() {
       title: t('about'),
       subtitle: t('version') + ' 1.0.0',
       icon: Info,
-      onPress: () => Alert.alert(
-        t('about'),
-        'Agrisol - AI-Powered Precision Agriculture System for Sustainable Crop Management in Rwanda\n\nDeveloped by: Davy Mbuto Nkurunziza\nVersion: 1.0.0 (MVP)',
-        [{ text: t('close') }]
-      ),
+      onPress: () =>
+        Alert.alert(
+          t('about'),
+          'Agrisol - AI-Powered Precision Agriculture System for Sustainable Crop Management in Rwanda\n\nDeveloped by: Davy Mbuto Nkurunziza\nVersion: 1.0.0 (MVP)',
+          [{ text: t('close') }]
+        ),
       showChevron: true,
     },
     {
@@ -113,11 +132,12 @@ export default function SettingsScreen() {
       title: t('developer'),
       subtitle: 'Davy Mbuto Nkurunziza',
       icon: User,
-      onPress: () => Alert.alert(
-        t('developer'),
-        'Davy Mbuto Nkurunziza\nSoftware Engineer & AI Enthusiast\n\nSpecializing in precision agriculture and sustainable farming solutions.',
-        [{ text: t('close') }]
-      ),
+      onPress: () =>
+        Alert.alert(
+          t('developer'),
+          'Davy Mbuto Nkurunziza\nSoftware Engineer & AI Enthusiast\n\nSpecializing in precision agriculture and sustainable farming solutions.',
+          [{ text: t('close') }]
+        ),
       showChevron: true,
     },
     {
@@ -163,12 +183,12 @@ export default function SettingsScreen() {
   ];
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+    <ScrollView
+      style={[styles.container, { backgroundColor: colors.background }]}
+      showsVerticalScrollIndicator={false}
+    >
       {/* Header */}
-      <LinearGradient
-        colors={['#374151', '#4b5563']}
-        style={styles.header}
-      >
+      <LinearGradient colors={['#374151', '#4b5563']} style={styles.header}>
         <SettingsIcon size={32} color="#ffffff" strokeWidth={2} />
         <Text style={styles.title}>{t('settings')}</Text>
         <Text style={styles.subtitle}>Customize your Agrisol experience</Text>
@@ -179,21 +199,52 @@ export default function SettingsScreen() {
         {settingsOptions.map((option) => (
           <TouchableOpacity
             key={option.id}
-            style={styles.settingItem}
+            style={[
+              styles.settingItem,
+              { backgroundColor: colors.surface, shadowColor: colors.shadow },
+            ]}
             onPress={option.onPress}
             activeOpacity={0.7}
           >
-            <View style={styles.settingIcon}>
-              <option.icon size={24} color="#059669" strokeWidth={2} />
+            <View
+              style={[
+                styles.settingIcon,
+                { backgroundColor: colors.primaryLight },
+              ]}
+            >
+              <option.icon size={24} color={colors.primary} strokeWidth={2} />
             </View>
-            
+
             <View style={styles.settingContent}>
-              <Text style={styles.settingTitle}>{option.title}</Text>
-              <Text style={styles.settingSubtitle}>{option.subtitle}</Text>
+              <Text style={[styles.settingTitle, { color: colors.text }]}>
+                {option.title}
+              </Text>
+              <Text
+                style={[
+                  styles.settingSubtitle,
+                  { color: colors.textSecondary },
+                ]}
+              >
+                {option.subtitle}
+              </Text>
             </View>
-            
+
+            {option.showToggle && (
+              <Switch
+                value={isDarkMode}
+                onValueChange={toggleDarkMode}
+                trackColor={{ false: colors.border, true: colors.primary }}
+                thumbColor={isDarkMode ? colors.surface : colors.surface}
+                ios_backgroundColor={colors.border}
+              />
+            )}
+
             {option.showChevron && (
-              <ChevronRight size={20} color="#6b7280" strokeWidth={2} />
+              <ChevronRight
+                size={20}
+                color={colors.textSecondary}
+                strokeWidth={2}
+              />
             )}
           </TouchableOpacity>
         ))}
@@ -201,12 +252,16 @@ export default function SettingsScreen() {
 
       {/* App Info */}
       <View style={styles.appInfoContainer}>
-        <Text style={styles.appInfoTitle}>Agrisol</Text>
-        <Text style={styles.appInfoSubtitle}>
+        <Text style={[styles.appInfoTitle, { color: colors.primary }]}>
+          Agrisol
+        </Text>
+        <Text style={[styles.appInfoSubtitle, { color: colors.textSecondary }]}>
           AI-Powered Crop Health Monitor
         </Text>
-        <Text style={styles.appInfoVersion}>Version 1.0.0 (MVP)</Text>
-        <Text style={styles.appInfoCopyright}>
+        <Text style={[styles.appInfoVersion, { color: colors.textMuted }]}>
+          Version 1.0.0 (MVP)
+        </Text>
+        <Text style={[styles.appInfoCopyright, { color: colors.textMuted }]}>
           © 2024 Davy Mbuto Nkurunziza. All rights reserved.
         </Text>
       </View>
@@ -218,36 +273,55 @@ export default function SettingsScreen() {
         animationType="slide"
         onRequestClose={() => setShowLanguageModal(false)}
       >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContainer}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>{t('selectLanguage')}</Text>
+        <View
+          style={[styles.modalOverlay, { backgroundColor: colors.overlay }]}
+        >
+          <View
+            style={[styles.modalContainer, { backgroundColor: colors.surface }]}
+          >
+            <View
+              style={[styles.modalHeader, { borderBottomColor: colors.border }]}
+            >
+              <Text style={[styles.modalTitle, { color: colors.text }]}>
+                {t('selectLanguage')}
+              </Text>
               <TouchableOpacity
                 style={styles.closeButton}
                 onPress={() => setShowLanguageModal(false)}
               >
-                <X size={24} color="#6b7280" strokeWidth={2} />
+                <X size={24} color={colors.textSecondary} strokeWidth={2} />
               </TouchableOpacity>
             </View>
-            
+
             <View style={styles.languageList}>
               {SUPPORTED_LANGUAGES.map((language) => (
                 <TouchableOpacity
                   key={language.code}
                   style={[
                     styles.languageItem,
-                    currentLanguage.code === language.code && styles.selectedLanguageItem,
+                    currentLanguage.code === language.code && {
+                      backgroundColor: colors.primaryLight,
+                    },
                   ]}
                   onPress={() => handleLanguageSelect(language)}
                   activeOpacity={0.7}
                 >
                   <Text style={styles.languageFlag}>{language.flag}</Text>
                   <View style={styles.languageInfo}>
-                    <Text style={styles.languageName}>{language.name}</Text>
-                    <Text style={styles.languageNativeName}>{language.nativeName}</Text>
+                    <Text style={[styles.languageName, { color: colors.text }]}>
+                      {language.name}
+                    </Text>
+                    <Text
+                      style={[
+                        styles.languageNativeName,
+                        { color: colors.textSecondary },
+                      ]}
+                    >
+                      {language.nativeName}
+                    </Text>
                   </View>
                   {currentLanguage.code === language.code && (
-                    <Check size={20} color="#059669" strokeWidth={2} />
+                    <Check size={20} color={colors.primary} strokeWidth={2} />
                   )}
                 </TouchableOpacity>
               ))}
@@ -264,7 +338,6 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8fafc',
   },
   header: {
     paddingTop: 60,
@@ -293,18 +366,15 @@ const styles = StyleSheet.create({
   settingItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#ffffff',
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,
     elevation: 2,
-    shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 4,
   },
   settingIcon: {
-    backgroundColor: '#ecfdf5',
     borderRadius: 12,
     padding: 8,
     marginRight: 16,
@@ -315,12 +385,10 @@ const styles = StyleSheet.create({
   settingTitle: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#1f2937',
     marginBottom: 2,
   },
   settingSubtitle: {
     fontSize: 14,
-    color: '#6b7280',
   },
   appInfoContainer: {
     alignItems: 'center',
@@ -331,32 +399,26 @@ const styles = StyleSheet.create({
   appInfoTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#059669',
     marginBottom: 4,
   },
   appInfoSubtitle: {
     fontSize: 16,
-    color: '#6b7280',
     marginBottom: 8,
   },
   appInfoVersion: {
     fontSize: 14,
-    color: '#9ca3af',
     marginBottom: 16,
   },
   appInfoCopyright: {
     fontSize: 12,
-    color: '#9ca3af',
     textAlign: 'center',
     lineHeight: 18,
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'flex-end',
   },
   modalContainer: {
-    backgroundColor: '#ffffff',
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     paddingBottom: 40,
@@ -368,12 +430,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
   },
   modalTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#1f2937',
   },
   closeButton: {
     padding: 4,
@@ -389,9 +449,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     marginVertical: 4,
   },
-  selectedLanguageItem: {
-    backgroundColor: '#ecfdf5',
-  },
   languageFlag: {
     fontSize: 24,
     marginRight: 16,
@@ -402,12 +459,10 @@ const styles = StyleSheet.create({
   languageName: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1f2937',
     marginBottom: 2,
   },
   languageNativeName: {
     fontSize: 14,
-    color: '#6b7280',
   },
   bottomSpacing: {
     height: 20,

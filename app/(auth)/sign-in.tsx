@@ -15,6 +15,8 @@ import { router } from 'expo-router';
 import { Leaf, Mail, Lock, Eye, EyeOff } from 'lucide-react-native';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { LanguageSelector } from '@/components/LanguageSelector';
+import { DarkModeToggle } from '@/components/DarkModeToggle';
 
 export default function SignInScreen() {
   const { signIn } = useAuth();
@@ -42,8 +44,8 @@ export default function SignInScreen() {
   };
 
   return (
-    <KeyboardAvoidingView 
-      style={styles.container} 
+    <KeyboardAvoidingView
+      style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <ScrollView contentContainerStyle={styles.scrollContainer}>
@@ -51,6 +53,16 @@ export default function SignInScreen() {
           colors={['#059669', '#10b981', '#34d399']}
           style={styles.header}
         >
+          {/* Language Selector in top left corner */}
+          <View style={styles.languageSelectorContainer}>
+            <LanguageSelector compact={true} showLabel={false} />
+          </View>
+
+          {/* Dark Mode Toggle in top right corner */}
+          <View style={styles.darkModeToggleContainer}>
+            <DarkModeToggle compact={true} />
+          </View>
+
           <View style={styles.logoContainer}>
             <Leaf size={60} color="#ffffff" strokeWidth={2} />
           </View>
@@ -127,7 +139,8 @@ export default function SignInScreen() {
             onPress={() => router.push('/(auth)/sign-up')}
           >
             <Text style={styles.signUpLinkText}>
-              {t('dontHaveAccount')} <Text style={styles.signUpLinkBold}>{t('signUp')}</Text>
+              {t('dontHaveAccount')}{' '}
+              <Text style={styles.signUpLinkBold}>{t('signUp')}</Text>
             </Text>
           </TouchableOpacity>
         </View>
@@ -151,6 +164,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderBottomLeftRadius: 32,
     borderBottomRightRadius: 32,
+    position: 'relative',
+  },
+  languageSelectorContainer: {
+    position: 'absolute',
+    top: 50,
+    left: 20,
+    zIndex: 100,
+  },
+  darkModeToggleContainer: {
+    position: 'absolute',
+    top: 50,
+    right: 20,
+    zIndex: 100,
   },
   logoContainer: {
     backgroundColor: 'rgba(255, 255, 255, 0.2)',

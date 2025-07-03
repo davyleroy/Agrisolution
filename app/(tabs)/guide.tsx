@@ -40,7 +40,8 @@ export default function GuideScreen() {
       name: 'Early Blight',
       crop: 'Tomato, Potato',
       severity: 'High',
-      image: 'https://images.pexels.com/photos/1153655/pexels-photo-1153655.jpeg?auto=compress&cs=tinysrgb&w=300',
+      image:
+        'https://images.pexels.com/photos/1153655/pexels-photo-1153655.jpeg?auto=compress&cs=tinysrgb&w=300',
       symptoms: ['Dark spots on leaves', 'Yellowing around spots', 'Leaf drop'],
       treatment: 'Apply copper-based fungicide, remove affected leaves',
       prevention: 'Ensure good air circulation, avoid overhead watering',
@@ -50,7 +51,8 @@ export default function GuideScreen() {
       name: 'Powdery Mildew',
       crop: 'Various crops',
       severity: 'Medium',
-      image: 'https://images.pexels.com/photos/1459534/pexels-photo-1459534.jpeg?auto=compress&cs=tinysrgb&w=300',
+      image:
+        'https://images.pexels.com/photos/1459534/pexels-photo-1459534.jpeg?auto=compress&cs=tinysrgb&w=300',
       symptoms: ['White powdery coating', 'Stunted growth', 'Leaf distortion'],
       treatment: 'Apply sulfur-based fungicide, improve ventilation',
       prevention: 'Plant resistant varieties, maintain proper spacing',
@@ -60,7 +62,8 @@ export default function GuideScreen() {
       name: 'Bacterial Spot',
       crop: 'Pepper, Tomato',
       severity: 'Medium',
-      image: 'https://images.pexels.com/photos/1459534/pexels-photo-1459534.jpeg?auto=compress&cs=tinysrgb&w=300',
+      image:
+        'https://images.pexels.com/photos/1459534/pexels-photo-1459534.jpeg?auto=compress&cs=tinysrgb&w=300',
       symptoms: ['Small dark spots', 'Yellow halos', 'Fruit lesions'],
       treatment: 'Use copper sprays, remove infected plants',
       prevention: 'Use certified seeds, practice crop rotation',
@@ -136,7 +139,7 @@ export default function GuideScreen() {
     },
     {
       month: 'April',
-      crops: ['Beans', 'Squash', 'Corn'],
+      crops: ['Beans', 'Potatoes', 'Squash', 'Corn'],
       activities: ['Direct sow warm crops', 'Install supports'],
     },
   ];
@@ -159,22 +162,22 @@ export default function GuideScreen() {
       {diseases.map((disease) => (
         <View key={disease.id} style={styles.diseaseCard}>
           <Image source={{ uri: disease.image }} style={styles.diseaseImage} />
-          
+
           <View style={styles.diseaseContent}>
             <View style={styles.diseaseHeader}>
               <Text style={styles.diseaseName}>{disease.name}</Text>
-              <View 
+              <View
                 style={[
-                  styles.severityBadge, 
-                  { backgroundColor: getSeverityColor(disease.severity) }
+                  styles.severityBadge,
+                  { backgroundColor: getSeverityColor(disease.severity) },
                 ]}
               >
                 <Text style={styles.severityText}>{disease.severity}</Text>
               </View>
             </View>
-            
+
             <Text style={styles.diseaseCrop}>Affects: {disease.crop}</Text>
-            
+
             <View style={styles.diseaseSection}>
               <Text style={styles.sectionTitle}>Symptoms:</Text>
               {disease.symptoms.map((symptom, index) => (
@@ -184,12 +187,12 @@ export default function GuideScreen() {
                 </View>
               ))}
             </View>
-            
+
             <View style={styles.diseaseSection}>
               <Text style={styles.sectionTitle}>Treatment:</Text>
               <Text style={styles.treatmentText}>{disease.treatment}</Text>
             </View>
-            
+
             <View style={styles.diseaseSection}>
               <Text style={styles.sectionTitle}>Prevention:</Text>
               <Text style={styles.preventionText}>{disease.prevention}</Text>
@@ -205,12 +208,17 @@ export default function GuideScreen() {
       {careTips.map((tip) => (
         <View key={tip.id} style={styles.tipCard}>
           <View style={styles.tipHeader}>
-            <View style={[styles.tipIconContainer, { backgroundColor: `${tip.color}20` }]}>
+            <View
+              style={[
+                styles.tipIconContainer,
+                { backgroundColor: `${tip.color}20` },
+              ]}
+            >
               <tip.icon size={24} color={tip.color} strokeWidth={2} />
             </View>
             <Text style={styles.tipTitle}>{tip.title}</Text>
           </View>
-          
+
           <View style={styles.tipsList}>
             {tip.tips.map((tipText, index) => (
               <View key={index} style={styles.tipItem}>
@@ -232,7 +240,7 @@ export default function GuideScreen() {
             <Calendar size={20} color="#059669" strokeWidth={2} />
             <Text style={styles.calendarMonth}>{month.month}</Text>
           </View>
-          
+
           <View style={styles.calendarSection}>
             <Text style={styles.calendarSectionTitle}>Recommended Crops:</Text>
             <View style={styles.cropsContainer}>
@@ -243,7 +251,7 @@ export default function GuideScreen() {
               ))}
             </View>
           </View>
-          
+
           <View style={styles.calendarSection}>
             <Text style={styles.calendarSectionTitle}>Activities:</Text>
             {month.activities.map((activity, actIndex) => (
@@ -274,13 +282,12 @@ export default function GuideScreen() {
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       {/* Header */}
-      <LinearGradient
-        colors={['#059669', '#10b981']}
-        style={styles.header}
-      >
+      <LinearGradient colors={['#059669', '#10b981']} style={styles.header}>
         <BookOpen size={32} color="#ffffff" strokeWidth={2} />
         <Text style={styles.title}>Crop Care Guide</Text>
-        <Text style={styles.subtitle}>Essential knowledge for healthy crops</Text>
+        <Text style={styles.subtitle}>
+          Essential knowledge for healthy crops
+        </Text>
       </LinearGradient>
 
       {/* Category Tabs */}
@@ -294,10 +301,10 @@ export default function GuideScreen() {
             ]}
             onPress={() => setSelectedCategory(category.id)}
           >
-            <category.icon 
-              size={20} 
-              color={selectedCategory === category.id ? '#ffffff' : '#6b7280'} 
-              strokeWidth={2} 
+            <category.icon
+              size={20}
+              color={selectedCategory === category.id ? '#ffffff' : '#6b7280'}
+              strokeWidth={2}
             />
             <Text
               style={[
